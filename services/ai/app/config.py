@@ -16,13 +16,16 @@ class Settings:
     profanity_path: Path
     top_k: int
     allowed_origins: tuple[str, ...]
+    ai_model: str
+    ai_gateway_url: str
+    ai_gateway_token: str | None
 
 
 def load_settings() -> Settings:
     data_dir = SERVICE_ROOT / "data"
     configured_data_path = os.getenv("PORTY_DATA_PATH")
     repository_root = SERVICE_ROOT.parents[1]
-    data_path = data_dir / "split_results_two.json"
+    data_path = data_dir / "knowledge.json"
 
     if configured_data_path:
         configured_path = Path(configured_data_path).expanduser()
@@ -45,5 +48,17 @@ def load_settings() -> Settings:
                 "http://localhost:5173,http://127.0.0.1:5173",
             ).split(",")
             if origin.strip()
+        ),
+        ai_model=os.getenv(
+            "PORTY_AI_MODEL",
+            "google/gemini-2.5-flash-lite",
+        ),
+        ai_gateway_url=os.getenv(
+            "PORTY_AI_GATEWAY_URL",
+            "https://ai-gateway.vercel.sh/v1",
+        ).rstrip("/"),
+        ai_gateway_token=(
+            os.getenv("AI_GATEWAY_API_KEY")
+            or os.getenv("VERCEL_OIDC_TOKEN")
         ),
     )

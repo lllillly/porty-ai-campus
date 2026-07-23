@@ -168,9 +168,17 @@ const ChatPage = () => {
     }
 
     try {
+      const history = chats
+        .filter((chat) => chat.text && !chat.showQuickActions)
+        .map((chat) => ({
+          role: chat.sender === "user" ? "user" : "assistant",
+          content: chat.text,
+        }))
+        .slice(-6);
       const response = await sendChatMessage({
         sessionId,
         message: text,
+        history,
       });
 
       appendChat({

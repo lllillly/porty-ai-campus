@@ -4,10 +4,11 @@ from contextlib import asynccontextmanager
 from datetime import date
 from typing import Any
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import Settings, load_settings
+from .generator import extractive_answer, generate_grounded_answer
 from .models import QueryRequest, QueryResponse, Source
 from .retrieval import LexicalRetriever, read_json, tokenize
 
@@ -40,8 +41,8 @@ async def lifespan(_: FastAPI):
 
 app = FastAPI(
     title="PORTY AI Service",
-    version="0.1.0",
-    description="외부 API 키 없이 실행 가능한 공주대학교 정보 검색 서비스",
+    version="0.2.0",
+    description="공식 자료 검색과 근거 기반 생성을 결합한 공주대학교 정보 서비스",
     lifespan=lifespan,
 )
 app.add_middleware(
@@ -90,7 +91,19 @@ def shuttle_response(message: str) -> str | None:
     if not selected:
         return "현재 등록된 셔틀버스 정보가 없습니다."
 
-    lines = ["저장된 셔틀버스 기준 정보예요."]
+    service_period = shuttle_data.get("service_period", {})
+    period_years = sorted(
+        {
+            str(value).split("-", 1)[0]
+            for semester in ("1학기", "2학기")
+            for value in service_period.get(semester, {}).values()
+            if value
+        }
+    )
+    period_label = "·".join(period_years) if period_years else "과거"
+    lines = [
+        f"아래 내용은 보관된 {period_label}년 셔틀 시간표로, 현재 운행을 보장하지 않는 참고 자료예요."
+    ]
     for route in selected:
         lines.append(f"\n[{route.get('route', '노선')}]")
         for timetable in route.get("timetable", [])[:4]:
@@ -100,7 +113,7 @@ def shuttle_response(message: str) -> str | None:
                 f"- {departure} 출발"
                 + (f" · {arrival} 도착" if arrival else "")
             )
-    lines.append("\n운영 전에는 학교 공식 공지에서 최신 시간표를 확인해 주세요.")
+    lines.append("\n이용 전에는 학교 공식 공지에서 최신 시간표를 반드시 확인해 주세요.")
     return "\n".join(lines)
 
 
@@ -128,13 +141,73 @@ def campus_address_response(message: str) -> QueryResponse | None:
     return None
 
 
+def source_from_hit(hit: Any) -> Source:
+    return Source(
+        category=hit.category,
+        title=hit.title,
+        snippet=hit.snippet,
+        score=hit.score,
+        source_url=hit.source_url,
+        reference_date=hit.reference_date,
+    )
+
+
+def relevant_hits(hits: list[Any]) -> list[Any]:
+    if not hits or hits[0].score < 10.0:
+        return []
+
+    cutoff = max(6.0, hits[0].score * 0.42)
+    return [hit for hit in hits if hit.score >= cutoff]
+
+
+def retrieval_message(body: QueryRequest, message: str) -> str:
+    message_words = [
+        token
+        for token in tokenize(message)
+        if not token.startswith("~")
+    ]
+    follow_up_markers = ("그거", "그건", "그럼", "그러면", "아까", "해당")
+    is_follow_up = len(message_words) <= 1 or any(
+        marker in message for marker in follow_up_markers
+    )
+    if not is_follow_up:
+        return message
+
+    user_messages = [
+        item.content.strip()
+        for item in body.messages
+        if item.role == "user" and item.content.strip()
+    ]
+    if len(user_messages) < 2:
+        return message
+    return f"{user_messages[-2]} {message}"
+
+
+def answer_with_source(answer: str, hit: Any) -> str:
+    if not hit.source_url or hit.source_url in answer:
+        return answer
+    return f"{answer}\n\n[공식 안내 확인]({hit.source_url})"
+
+
+def gateway_token(request: Request) -> str | None:
+    return (
+        settings.ai_gateway_token
+        or request.headers.get("x-vercel-oidc-token")
+    )
+
+
 @app.get("/health")
 @app.get("/api/ai/health")
-def health() -> dict[str, Any]:
+def health(request: Request) -> dict[str, Any]:
     return {
         "status": "ok",
         "mode": "local-retrieval",
         "documents": len(retriever.documents),
+        "answer_engine": (
+            settings.ai_model
+            if gateway_token(request)
+            else "grounded-extractive-fallback"
+        ),
         "date": date.today().isoformat(),
     }
 
@@ -149,7 +222,7 @@ def data_health() -> dict[str, Any]:
 
 
 @app.post("/api/ai/query", response_model=QueryResponse)
-def query(body: QueryRequest) -> QueryResponse:
+def query(body: QueryRequest, request: Request) -> QueryResponse:
     message = last_user_message(body)
 
     if contains_profanity(message):
@@ -167,7 +240,8 @@ def query(body: QueryRequest) -> QueryResponse:
     if response := campus_address_response(message):
         return response
 
-    hits = retriever.search(message, settings.top_k)
+    search_query = retrieval_message(body, message)
+    hits = relevant_hits(retriever.search(search_query, settings.top_k))
     if not hits:
         return QueryResponse(
             response=(
@@ -177,23 +251,24 @@ def query(body: QueryRequest) -> QueryResponse:
             mode="fallback",
         )
 
-    best = hits[0]
-    return QueryResponse(
-        response=(
-            "공주대학교 자료에서 다음 내용을 찾았어요.\n\n"
-            f"{best.snippet}\n\n"
-            "자료의 기준 시점이 오래되었을 수 있으니 중요한 일정은 공식 홈페이지에서 확인해 주세요."
-        ),
-        sources=[
-            Source(
-                category=hit.category,
-                title=hit.title,
-                snippet=hit.snippet,
-                score=hit.score,
-            )
-            for hit in hits
+    generated_answer = generate_grounded_answer(
+        question=message,
+        hits=hits,
+        token=gateway_token(request),
+        model=settings.ai_model,
+        gateway_url=settings.ai_gateway_url,
+        conversation=[
+            {"role": item.role, "content": item.content}
+            for item in body.messages[-7:-1]
+            if item.role in {"user", "assistant"}
         ],
-        mode="retrieval",
+    )
+    answer = generated_answer or extractive_answer(hits[0])
+
+    return QueryResponse(
+        response=answer_with_source(answer, hits[0]),
+        sources=[source_from_hit(hit) for hit in hits],
+        mode="generated" if generated_answer else "retrieval",
     )
 
 

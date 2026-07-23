@@ -20,10 +20,17 @@ class Source(BaseModel):
     title: str
     snippet: str
     score: float
+    source_url: str | None = None
+    reference_date: str | None = None
 
 
 class QueryResponse(BaseModel):
     response: str
-    sources: list[Source] = []
-    mode: Literal["small-talk", "structured", "retrieval", "fallback"]
-
+    sources: list[Source] = Field(default_factory=list)
+    mode: Literal[
+        "small-talk",
+        "structured",
+        "generated",
+        "retrieval",
+        "fallback",
+    ]

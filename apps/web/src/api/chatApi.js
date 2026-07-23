@@ -50,7 +50,16 @@ async function persistExchange({ sessionId, message, response, sources }) {
   }
 }
 
-export async function sendChatMessage({ sessionId, message }) {
+export async function sendChatMessage({ sessionId, message, history = [] }) {
+  const messages = [
+    ...history
+      .filter(({ role, content }) =>
+        ["user", "assistant"].includes(role) && content?.trim(),
+      )
+      .slice(-6),
+    { role: "user", content: message },
+  ];
+
   const request = await fetch(`${aiApiUrl}/api/ai/query`, {
     method: "POST",
     headers: {
@@ -58,7 +67,7 @@ export async function sendChatMessage({ sessionId, message }) {
     },
     body: JSON.stringify({
       sessionId,
-      messages: [{ role: "user", content: message }],
+      messages,
     }),
   });
 
