@@ -64,11 +64,11 @@ const DietCard = ({ campus, place, dorm, onBackToMain }) => {
       ))}
 
       <OfficialLink
-        href="https://www.kongju.ac.kr/KNU/index.do"
+        href="https://www.kongju.ac.kr/KNU/16863/subview.do"
         target="_blank"
         rel="noreferrer"
       >
-        학교 공식 홈페이지에서 확인 <ExternalLink size={14} />
+        오늘의 공식 식단 확인 <ExternalLink size={14} />
       </OfficialLink>
 
       <BackButton onClick={onBackToMain}>

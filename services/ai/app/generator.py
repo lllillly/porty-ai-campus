@@ -4,7 +4,7 @@ from typing import Mapping, Sequence
 
 import httpx
 
-from .retrieval import SearchHit
+from .retrieval import SearchHit, expanded_query_words
 
 
 SYSTEM_PROMPT = """\
@@ -94,12 +94,40 @@ def generate_grounded_answer(
         return None
 
 
-def extractive_answer(hit: SearchHit) -> str:
+def extractive_answer(hit: SearchHit, question: str | None = None) -> str:
     lines = [
         line.strip()
         for line in hit.snippet.splitlines()
         if len(line.strip()) >= 4
-    ][:5]
+        and line.strip() not in {"[전화번호 비공개]", "[이메일 비공개]"}
+        and not line.strip().startswith(("http://", "https://"))
+    ]
+
+    if question and lines:
+        query_words = set(expanded_query_words(question))
+        scored = [
+            (
+                sum(1 for word in query_words if word in line.lower()),
+                index,
+            )
+            for index, line in enumerate(lines)
+        ]
+        matching_indices = [
+            index
+            for score, index in sorted(
+                scored,
+                key=lambda item: (-item[0], item[1]),
+            )
+            if score > 0
+        ][:1]
+        selected = set(matching_indices)
+        for index in matching_indices:
+            if index + 1 < len(lines):
+                selected.add(index + 1)
+        if selected:
+            lines = [lines[index] for index in sorted(selected)]
+
+    lines = lines[:5]
     summary = "\n".join(f"- {line}" for line in lines)
     reference = (
         f"\n\n_자료 기준일: {hit.reference_date}_"

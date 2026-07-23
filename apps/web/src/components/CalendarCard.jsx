@@ -54,11 +54,11 @@ const CalendarCard = ({ onBackToMain }) => {
             ))}
           </SourceList>
           <OfficialLink
-            href="https://www.kongju.ac.kr/KNU/index.do"
+            href="https://www.kongju.ac.kr/KNU/16834/subview.do"
             target="_blank"
             rel="noreferrer"
           >
-            학교 공식 홈페이지에서 확인 <ExternalLink size={14} />
+            최신 학사일정 확인 <ExternalLink size={14} />
           </OfficialLink>
         </>
       )}

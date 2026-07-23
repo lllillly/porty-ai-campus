@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
-from datetime import date
+from datetime import datetime
 from typing import Any
+from zoneinfo import ZoneInfo
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -25,6 +26,8 @@ CAMPUS_ADDRESSES = {
     "천안": "충청남도 천안시 서북구 천안대로 1223-24",
     "예산": "충청남도 예산군 예산읍 대학로 54",
 }
+KOREA_TIMEZONE = ZoneInfo("Asia/Seoul")
+SHUTTLE_SOURCE_URL = "https://www.kongju.ac.kr/KNU/16872/subview.do"
 
 
 @asynccontextmanager
@@ -76,9 +79,43 @@ def small_talk_response(message: str) -> str | None:
     return None
 
 
-def shuttle_response(message: str) -> str | None:
-    if not any(keyword in message for keyword in ("셔틀", "버스")):
+def shuttle_response(message: str) -> QueryResponse | None:
+    if not any(
+        keyword in message
+        for keyword in ("셔틀", "통학버스", "무료버스", "순환버스")
+    ):
         return None
+
+    service_period = shuttle_data.get("service_period", {})
+    current_year = datetime.now(KOREA_TIMEZONE).year
+    period_years = sorted(
+        {
+            int(str(value).split("-", 1)[0])
+            for semester in ("1학기", "2학기")
+            for value in service_period.get(semester, {}).values()
+            if value and str(value).split("-", 1)[0].isdigit()
+        }
+    )
+    if not period_years or max(period_years) < current_year:
+        content = (
+            "저장된 셔틀 시간표는 기간이 지나 현재 운행시간으로 안내하지 않아요. "
+            "학교 공식 버스 안내에서 최신 운행기간과 노선을 확인해 주세요.\n\n"
+            f"[최신 셔틀·무료버스 시간표 확인]({SHUTTLE_SOURCE_URL})"
+        )
+        return QueryResponse(
+            response=content,
+            sources=[
+                Source(
+                    category="캠퍼스",
+                    title="셔틀·무료버스 최신 시간표",
+                    snippet="운행기간과 노선은 학기마다 변경될 수 있습니다.",
+                    score=1.0,
+                    source_url=SHUTTLE_SOURCE_URL,
+                    reference_date=str(current_year),
+                )
+            ],
+            mode="structured",
+        )
 
     routes = shuttle_data.get("shuttle_schedules", [])
     locations = set(tokenize(message))
@@ -89,18 +126,12 @@ def shuttle_response(message: str) -> str | None:
     ]
     selected = matching[:2] or routes[:1]
     if not selected:
-        return "현재 등록된 셔틀버스 정보가 없습니다."
+        return QueryResponse(
+            response="현재 등록된 셔틀버스 정보가 없습니다.",
+            mode="fallback",
+        )
 
-    service_period = shuttle_data.get("service_period", {})
-    period_years = sorted(
-        {
-            str(value).split("-", 1)[0]
-            for semester in ("1학기", "2학기")
-            for value in service_period.get(semester, {}).values()
-            if value
-        }
-    )
-    period_label = "·".join(period_years) if period_years else "과거"
+    period_label = "·".join(str(year) for year in period_years)
     lines = [
         f"아래 내용은 보관된 {period_label}년 셔틀 시간표로, 현재 운행을 보장하지 않는 참고 자료예요."
     ]
@@ -114,7 +145,7 @@ def shuttle_response(message: str) -> str | None:
                 + (f" · {arrival} 도착" if arrival else "")
             )
     lines.append("\n이용 전에는 학교 공식 공지에서 최신 시간표를 반드시 확인해 주세요.")
-    return "\n".join(lines)
+    return QueryResponse(response="\n".join(lines), mode="structured")
 
 
 def campus_address_response(message: str) -> QueryResponse | None:
@@ -133,6 +164,7 @@ def campus_address_response(message: str) -> QueryResponse | None:
                         title=f"{display_name}캠퍼스 주소",
                         snippet=content,
                         score=1.0,
+                        source_url="https://www.kongju.ac.kr/KNU/16713/subview.do",
                     )
                 ],
                 mode="structured",
@@ -156,8 +188,7 @@ def relevant_hits(hits: list[Any]) -> list[Any]:
     if not hits or hits[0].score < 10.0:
         return []
 
-    cutoff = max(6.0, hits[0].score * 0.42)
-    return [hit for hit in hits if hit.score >= cutoff]
+    return hits[:1]
 
 
 def retrieval_message(body: QueryRequest, message: str) -> str:
@@ -208,7 +239,7 @@ def health(request: Request) -> dict[str, Any]:
             if gateway_token(request)
             else "grounded-extractive-fallback"
         ),
-        "date": date.today().isoformat(),
+        "date": datetime.now(KOREA_TIMEZONE).date().isoformat(),
     }
 
 
@@ -235,7 +266,16 @@ def query(body: QueryRequest, request: Request) -> QueryResponse:
         return QueryResponse(response=response, mode="small-talk")
 
     if response := shuttle_response(message):
-        return QueryResponse(response=response, mode="structured")
+        return response
+
+    if "시내버스" in message:
+        return QueryResponse(
+            response=(
+                "시내버스 노선과 도착시간은 실시간으로 바뀌어 PORTY의 저장 자료로 "
+                "안내하지 않아요. 지도·교통 앱에서 현재 위치 기준으로 확인해 주세요."
+            ),
+            mode="fallback",
+        )
 
     if response := campus_address_response(message):
         return response
@@ -263,7 +303,7 @@ def query(body: QueryRequest, request: Request) -> QueryResponse:
             if item.role in {"user", "assistant"}
         ],
     )
-    answer = generated_answer or extractive_answer(hits[0])
+    answer = generated_answer or extractive_answer(hits[0], message)
 
     return QueryResponse(
         response=answer_with_source(answer, hits[0]),
@@ -274,13 +314,13 @@ def query(body: QueryRequest, request: Request) -> QueryResponse:
 
 @app.get("/api/ai/schedule")
 def schedule() -> dict[str, Any]:
-    hits = retriever.search("학사 일정 수강신청 개강 종강", 5)
-    schedule_keywords = ("일정", "수강신청", "개강", "종강", "재입학")
+    hits = retriever.search("학사일정 개강 시험 계절학기", 5)
+    schedule_keywords = ("일정", "개강", "시험", "계절학기")
     relevant_hits = [
         hit
         for hit in hits
         if any(keyword in hit.snippet for keyword in schedule_keywords)
-    ][:3]
+    ][:1]
     return {
         "status": "reference-only",
         "message": "저장된 학사 자료입니다. 최신 일정은 공식 홈페이지에서 확인해 주세요.",
@@ -291,10 +331,14 @@ def schedule() -> dict[str, Any]:
 @app.get("/api/ai/meal/{campus}")
 def meal(campus: str, location: str, dorm: str | None = None) -> dict[str, Any]:
     return {
-        "status": "integration-required",
+        "status": "official-link-required",
         "campus": campus,
         "location": location,
         "dorm": dorm,
         "meals": [],
-        "message": "실시간 식단 수집기는 운영 환경에서 별도로 연결해야 합니다.",
+        "message": (
+            "식단은 매일 변경되므로 저장된 메뉴를 표시하지 않습니다. "
+            "학교 공식 식단 페이지에서 오늘 메뉴를 확인해 주세요."
+        ),
+        "source_url": "https://www.kongju.ac.kr/KNU/16863/subview.do",
     }

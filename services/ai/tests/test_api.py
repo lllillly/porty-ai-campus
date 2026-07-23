@@ -143,3 +143,67 @@ def test_query_uses_vercel_runtime_oidc_header(monkeypatch):
     assert response.status_code == 200
     assert response.json()["mode"] == "generated"
     assert captured["token"] == "short-lived-test-token"
+
+
+def test_query_routes_live_meal_question_to_official_page():
+    with TestClient(app) as client:
+        response = client.post(
+            "/api/ai/query",
+            json={
+                "messages": [
+                    {"role": "user", "content": "오늘 학식 메뉴 알려줘"}
+                ]
+            },
+        )
+
+    payload = response.json()
+    assert payload["sources"][0]["title"] == "학식 식단 확인"
+    assert "오늘" in payload["response"]
+    assert "https://www.kongju.ac.kr/KNU/16863/subview.do" in payload["response"]
+
+
+def test_meal_endpoint_never_returns_stale_menu_as_current():
+    with TestClient(app) as client:
+        response = client.get(
+            "/api/ai/meal/공주?location=학생식당"
+        )
+
+    payload = response.json()
+    assert payload["status"] == "official-link-required"
+    assert payload["meals"] == []
+    assert payload["source_url"].endswith("/16863/subview.do")
+
+
+def test_expired_shuttle_schedule_only_links_to_current_official_page():
+    with TestClient(app) as client:
+        response = client.post(
+            "/api/ai/query",
+            json={
+                "messages": [
+                    {"role": "user", "content": "셔틀버스 시간표 알려줘"}
+                ]
+            },
+        )
+
+    payload = response.json()
+    assert payload["mode"] == "structured"
+    assert "기간이 지나" in payload["response"]
+    assert "08:00" not in payload["response"]
+    assert payload["sources"][0]["source_url"].endswith("/16872/subview.do")
+
+
+def test_city_bus_question_is_not_misrouted_to_parking_or_shuttle():
+    with TestClient(app) as client:
+        response = client.post(
+            "/api/ai/query",
+            json={
+                "messages": [
+                    {"role": "user", "content": "시내버스 정류장이 어디야?"}
+                ]
+            },
+        )
+
+    payload = response.json()
+    assert payload["mode"] == "fallback"
+    assert payload["sources"] == []
+    assert "교통 앱" in payload["response"]

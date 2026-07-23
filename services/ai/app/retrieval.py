@@ -39,7 +39,19 @@ QUERY_EXPANSIONS = {
     "복전": ("복수전공",),
     "셔틀": ("버스",),
     "성적표": ("증명서", "성적"),
+    "성적조회": ("성적 조회", "통합정보시스템"),
     "재학증명": ("증명서",),
+    "기숙사비": ("생활관비", "학생생활관 비용"),
+    "생활관비": ("학생생활관 비용",),
+    "학식": ("식단", "학생식당"),
+    "학생증": ("학생증 발급",),
+    "개강": ("학사일정",),
+    "시험기간": ("학사일정",),
+    "시험": ("학사일정",),
+    "중간고사": ("학사일정",),
+    "기말고사": ("학사일정",),
+    "계절학기": ("계절수업", "학사일정"),
+    "9공학관": ("제9공학관", "천안캠퍼스", "캠퍼스 건물"),
     "언제": ("시기", "기간", "일정"),
     "까지": ("시기", "기간", "일정"),
     "어떻게": ("방법", "절차", "신청"),
@@ -148,6 +160,19 @@ def expanded_query_words(query: str) -> list[str]:
     lowered = query.lower()
     for trigger, replacements in QUERY_EXPANSIONS.items():
         if trigger in lowered:
+            if trigger == "얼마" and any(
+                term in lowered
+                for term in (
+                    "요금",
+                    "비용",
+                    "금액",
+                    "등록금",
+                    "학비",
+                    "기숙사비",
+                    "생활관비",
+                )
+            ):
+                continue
             for replacement in replacements:
                 expanded.extend(word_tokens(replacement))
     return expanded
@@ -217,7 +242,7 @@ class BM25Retriever:
             normalized_query = clean_text(query).lower()
 
             if len(title_lower) >= 2 and title_lower in normalized_query:
-                score += 8.0
+                score += 18.0
 
             matched_words = 0
             for word in set(original_query_words):
