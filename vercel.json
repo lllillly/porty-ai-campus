@@ -1,0 +1,17 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "npm run build",
+  "outputDirectory": "apps/web/dist",
+  "rewrites": [
+    {
+      "source": "/health",
+      "destination": "/index.html"
+    }
+  ],
+  "functions": {
+    "api/**/*.py": {
+      "includeFiles": "services/ai/data/**",
+      "excludeFiles": "{apps/**,services/ai/.venv/**,services/ai/tests/**,**/__pycache__/**}"
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "name": "porty-ai-campus",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/web"
+  ],
+  "scripts": {
+    "dev": "npm run dev:web",
+    "build": "npm run build:web",
+    "test": "npm run test:web",
+    "dev:web": "npm --workspace apps/web run dev",
+    "build:web": "npm --workspace apps/web run build",
+    "test:web": "npm --workspace apps/web run test",
+    "supabase:init": "supabase init",
+    "supabase:start": "supabase start",
+    "supabase:stop": "supabase stop",
+    "supabase:reset": "supabase db reset"
+  },
+  "devDependencies": {
+    "supabase": "2.109.1"
+  }
+}

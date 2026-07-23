@@ -1,0 +1,9 @@
+body {
+  margin: 0;
+}
+
+html, body {
+    overflow: hidden; /* 스크롤 완전 차단 */
+    margin: 0;
+    padding: 0;
+}

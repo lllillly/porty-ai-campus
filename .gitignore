@@ -1,0 +1,37 @@
+# macOS / editors
+.DS_Store
+.idea/
+.vscode/
+
+# Environment and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# JavaScript
+node_modules/
+dist/
+coverage/
+
+# Java / Gradle
+.gradle/
+build/
+out/
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+
+# Generated AI artifacts
+*.index
+*.npy
+*.pt
+*.bin
+models/
+logs/
+
