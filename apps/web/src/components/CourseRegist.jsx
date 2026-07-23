@@ -48,14 +48,14 @@ const Header = styled.div`
     display: flex;
     align-items: center;
     gap: 0.4rem;
-    color: #9dabcF;
+    color: var(--porty-primary);
     margin-bottom: 0.4rem;
 `;
 
 const Section = styled.div`
     margin-top: 0.5rem;
-    background: #f8faff;
-    border-radius: 8px;
+    background: var(--porty-surface-soft);
+    border-radius: 12px;
     padding: 0.6rem 0.7rem;
     font-size: 0.85rem;
 
@@ -77,14 +77,14 @@ const Section = styled.div`
 
 const SubTitle = styled.div`
     font-weight: 600;
-    color: #414756;
+    color: var(--porty-text);
     margin-bottom: 0.3rem;
     font-size: 0.9rem;
 `;
 
 const PrimaryButton = styled.button`
-  background: #9dabcF;
-  color: #fff;
+  background: var(--porty-primary);
+  color: #10251a;
   border: none;
   border-radius: 10px;
   padding: 0.55rem 0.9rem;
@@ -95,7 +95,8 @@ const PrimaryButton = styled.button`
   transition: all 0.2s ease;
 
   &:hover {
-    background: #8a9bc5;
+    background: var(--porty-primary-hover);
+    color: #fff;
     transform: translateY(-1px);
   }
 `;

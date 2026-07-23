@@ -12,7 +12,6 @@ import CourseRegist from "../components/CourseRegist";
 import FAQPreview from "../components/FAQPreview";
 
 import Toast from "../components/Toast";
-import FloatingMenu from "../components/FloatingMenu";
 import SettingsModal from "../components/SettingsModal";
 import SplashScreen from "../components/SplashScreen";
 
@@ -20,7 +19,12 @@ import {
   ChatContainer,
   Header,
   HeaderContent,
+  BrandButton,
   Logo,
+  BrandCopy,
+  BrandName,
+  BrandStatus,
+  HeaderActions,
   MenuButton,
   NotificationButton,
   ChatBody,
@@ -104,9 +108,11 @@ const ChatPage = () => {
   }, []);
 
   useEffect(() => {
-    document.body.style.backgroundColor = isDarkMode ? "#000" : "#FFF";
+    document.body.style.backgroundColor = isDarkMode ? "#111513" : "#EEF5F2";
+    document.documentElement.dataset.theme = isDarkMode ? "dark" : "light";
     return () => {
       document.body.style.backgroundColor = "";
+      delete document.documentElement.dataset.theme;
     };
   }, [isDarkMode]);
 
@@ -220,29 +226,38 @@ const ChatPage = () => {
 
       <Header $isDark={isDarkMode}>
         <HeaderContent>
-          <Logo
-            src="/assets/logo.png"
+          <BrandButton
             onClick={() => window.location.reload()}
-          />
+            title="PORTY 대화 새로 시작하기"
+            aria-label="PORTY 대화 새로 시작하기"
+          >
+            <Logo src="/assets/porty-mark.svg" alt="" />
+            <BrandCopy>
+              <BrandName $isDark={isDarkMode}>PORTY</BrandName>
+              <BrandStatus $isDark={isDarkMode}>공주대 캠퍼스 도우미</BrandStatus>
+            </BrandCopy>
+          </BrandButton>
+
+          <HeaderActions>
+            <NotificationButton
+              $isDark={isDarkMode}
+              onClick={() => setShowDietModal(true)}
+              title="식단 설정"
+              aria-label="식단 설정 열기"
+            >
+              <Bell size={19} />
+            </NotificationButton>
+
+            <MenuButton
+              $isDark={isDarkMode}
+              onClick={() => setShowDarkModal(true)}
+              title="PORTY 설정"
+              aria-label="PORTY 설정 열기"
+            >
+              <Menu size={20} />
+            </MenuButton>
+          </HeaderActions>
         </HeaderContent>
-
-        <MenuButton
-          $isDark={isDarkMode}
-          onClick={() => setShowDarkModal(true)}
-          title="PORTY 설정"
-          aria-label="PORTY 설정 열기"
-        >
-          <Menu size={20} />
-        </MenuButton>
-
-        <NotificationButton
-          $isDark={isDarkMode}
-          onClick={() => setShowDietModal(true)}
-          title="식단 알림 설정"
-          aria-label="식단 알림 설정 열기"
-        >
-          <Bell size={20} />
-        </NotificationButton>
       </Header>
 
       {toastMessage && <Toast message={toastMessage} />}
@@ -294,8 +309,9 @@ const ChatPage = () => {
       </ChatBody>
 
       <InputArea $isDark={isDarkMode}>
-        <InputWrapper>
+        <InputWrapper $isDark={isDarkMode}>
           <StyledInput
+            $isDark={isDarkMode}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onFocus={() => setShowFAQ(true)}
@@ -303,7 +319,12 @@ const ChatPage = () => {
             placeholder="공주대 9공학관은 어디야?"
           />
 
-          <SendButton $isDark={isDarkMode} onClick={() => sendMessage()}>
+          <SendButton
+            $loading={loading}
+            disabled={loading || !message.trim()}
+            onClick={() => sendMessage()}
+            aria-label={loading ? "답변 작성 중" : "메시지 보내기"}
+          >
             {loading ? <Loader size={20} /> : <Send size={20} />}
           </SendButton>
         </InputWrapper>
@@ -331,11 +352,6 @@ const ChatPage = () => {
         />
       )}
 
-      <FloatingMenu
-        isDark={isDarkMode}
-        onOpenDarkMode={() => setShowDarkModal(true)}
-        onOpenDietSettings={() => setShowDietModal(true)}
-      />
     </ChatContainer>
   );
 };

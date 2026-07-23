@@ -11,9 +11,9 @@ const SplashScreen = () => {
     return (
         <SplashOverlay>
             <SplashBox>
-                <SplashImage src="/assets/knu_logo.png" />
+                <SplashImage src="/assets/porty-mark.svg" alt="" />
                 <SplashLogo>PORTY</SplashLogo>
-                <SplashSubtitle>공주대학교의 모든 것을 알려주는 LLM</SplashSubtitle>
+                <SplashSubtitle>공주대학교 캠퍼스 AI 도우미</SplashSubtitle>
             </SplashBox>
         </SplashOverlay>
     );

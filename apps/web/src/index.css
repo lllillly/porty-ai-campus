@@ -1,9 +1,87 @@
-body {
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  --porty-primary: #08b86a;
+  --porty-primary-hover: #079d5b;
+  --porty-primary-soft: #ddf7ea;
+  --porty-canvas: #eef5f2;
+  --porty-surface: #ffffff;
+  --porty-surface-soft: #f5f8f6;
+  --porty-text: #171c1a;
+  --porty-subtext: #65706b;
+  --porty-border: #dfe7e3;
+  --porty-shadow: 0 12px 32px rgba(28, 54, 42, 0.08);
+}
+
+:root[data-theme="dark"] {
+  --porty-primary: #24d184;
+  --porty-primary-hover: #44df9a;
+  --porty-primary-soft: #223a2f;
+  --porty-canvas: #111513;
+  --porty-surface: #1b211e;
+  --porty-surface-soft: #242b27;
+  --porty-text: #f5f7f6;
+  --porty-subtext: #aeb8b3;
+  --porty-border: #303934;
+  --porty-shadow: none;
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
   margin: 0;
 }
 
-html, body {
-    overflow: hidden; /* 스크롤 완전 차단 */
-    margin: 0;
-    padding: 0;
+html,
+body {
+  overflow: hidden;
+}
+
+body,
+button,
+input,
+select,
+textarea {
+  font-family:
+    Pretendard,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Apple SD Gothic Neo",
+    "Noto Sans KR",
+    "Segoe UI",
+    sans-serif;
+}
+
+body {
+  color: var(--porty-text);
+  background: var(--porty-canvas);
+}
+
+button,
+a,
+input {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+  outline: 3px solid rgba(8, 184, 106, 0.28);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

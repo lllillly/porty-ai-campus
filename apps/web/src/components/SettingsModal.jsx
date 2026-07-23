@@ -132,12 +132,12 @@ const SettingsModal = ({ isDarkMode, onToggleDarkMode, onClose }) => {
 const Divider = styled.hr`
   margin: 1.2rem 0;
   border: 0;
-  border-top: 1px solid #eef0f6;
+  border-top: 1px solid var(--porty-border);
 `;
 
 const Helper = styled.p`
   margin: 0.4rem 0 0;
-  color: #687086;
+  color: var(--porty-subtext);
   font-size: 0.84rem;
   line-height: 1.55;
 `;
@@ -146,21 +146,22 @@ const EmailInput = styled.input`
   width: 100%;
   margin-top: 0.45rem;
   padding: 0.8rem 0.9rem;
-  border: 1px solid #d5d9e2;
-  border-radius: 10px;
+  border: 1px solid var(--porty-border);
+  border-radius: 13px;
   box-sizing: border-box;
-  color: #414756;
+  background: var(--porty-surface-soft);
+  color: var(--porty-text);
   font-size: 0.95rem;
 
   &:focus {
-    border-color: #9dabcf;
-    outline: 2px solid #eaefff;
+    border-color: var(--porty-primary);
+    outline: 3px solid rgba(8, 184, 106, 0.15);
   }
 `;
 
 const AuthMessage = styled.p`
   margin: 0.7rem 0 0;
-  color: #6879ad;
+  color: var(--porty-primary-hover);
   font-size: 0.8rem;
   line-height: 1.45;
 `;
@@ -171,7 +172,7 @@ const CloseButton = styled.button`
   padding: 0.7rem;
   border: 0;
   background: transparent;
-  color: #687086;
+  color: var(--porty-subtext);
   cursor: pointer;
 `;
 

@@ -1,6 +1,7 @@
 import React from "react";
 import styled from "styled-components";
-// 질문 그나마 답변 잘나오는거 말해주시면 수정할게요 말해주셈~
+import { HelpCircle, Search, X } from "react-feather";
+
 const FAQ_LIST = [
     {
         id: 1,
@@ -30,22 +31,18 @@ const FAQ_LIST = [
 ];
 
 const FAQPreview = ({ searchTerm, onSelect, onClose }) => {
-    // 검색어로 FAQ 필터링
     const getFilteredFAQs = () => {
         if (!searchTerm || !searchTerm.trim()) {
-            // 검색어 없으면 전체 표시
             return FAQ_LIST;
         }
 
         const lowerSearchTerm = searchTerm.toLowerCase().trim();
 
         return FAQ_LIST.filter((faq) => {
-            // 질문 텍스트에 검색어가 포함되어 있는지 확인이요
             if (faq.question.toLowerCase().includes(lowerSearchTerm)) {
                 return true;
             }
 
-            // 키워드 중 하나라도 검색어에 포함되어 있는지 확인
             return faq.keywords.some((keyword) =>
                 lowerSearchTerm.includes(keyword) || keyword.includes(lowerSearchTerm)
             );
@@ -54,16 +51,20 @@ const FAQPreview = ({ searchTerm, onSelect, onClose }) => {
 
     const filteredFAQs = getFilteredFAQs();
 
-    // 항상 표시 (검색어가 있어도 전체 또는 필터링된 결과 표시)
     return (
         <FAQContainer onClick={(e) => e.stopPropagation()}>
             <FAQHeader>
                 <FAQTitle>
                     {filteredFAQs.length === FAQ_LIST.length
-                        ? "💡 자주 묻는 질문"
-                        : `🔍 검색 결과 (${filteredFAQs.length}개)`}
+                        ? <HelpCircle size={17} />
+                        : <Search size={17} />}
+                    {filteredFAQs.length === FAQ_LIST.length
+                        ? "자주 묻는 질문"
+                        : `검색 결과 ${filteredFAQs.length}개`}
                 </FAQTitle>
-                <CloseButton onClick={onClose}>✕</CloseButton>
+                <CloseButton onClick={onClose} aria-label="추천 질문 닫기">
+                    <X size={19} />
+                </CloseButton>
             </FAQHeader>
             <FAQList>
                 {filteredFAQs.length > 0 ? (
@@ -71,11 +72,11 @@ const FAQPreview = ({ searchTerm, onSelect, onClose }) => {
                         <FAQItem
                             key={faq.id}
                             onMouseDown={(e) => {
-                                e.preventDefault(); // blur 이벤트 방지
+                                e.preventDefault();
                                 onSelect(faq.question);
                             }}
                         >
-                            <QuestionIcon>❓</QuestionIcon>
+                            <QuestionIcon>Q</QuestionIcon>
                             <QuestionText>{faq.question}</QuestionText>
                         </FAQItem>
                     ))
@@ -89,16 +90,18 @@ const FAQPreview = ({ searchTerm, onSelect, onClose }) => {
 
 const FAQContainer = styled.div`
     position: absolute;
-    bottom: 11%;
-    left: 0;
-    right: 0;
-    background: rgba(255, 255, 255, 0.98);
-    backdrop-filter: blur(10px);
-    border-radius: 16px 16px 0 0;
-    padding: 1rem;
-    margin-bottom: 0.5rem;
-    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
-    animation: slideUp 0.2s ease-out;
+    right: 24px;
+    bottom: 90px;
+    left: 24px;
+    width: min(calc(100% - 48px), 820px);
+    margin: 0 auto;
+    padding: 14px;
+    border: 1px solid var(--porty-border);
+    border-radius: 18px;
+    background: color-mix(in srgb, var(--porty-surface) 96%, transparent);
+    box-shadow: 0 18px 48px rgba(19, 43, 32, 0.16);
+    backdrop-filter: blur(16px);
+    animation: slideUp 180ms ease-out;
     z-index: 200;
 
 
@@ -114,8 +117,11 @@ const FAQContainer = styled.div`
     }
 
     @media (max-width: 768px) {
-        padding: 0.85rem;
-        margin-bottom: 0.35rem;
+        right: 14px;
+        bottom: 78px;
+        left: 14px;
+        width: calc(100% - 28px);
+        padding: 12px;
     }
 `;
 
@@ -123,45 +129,47 @@ const FAQHeader = styled.div`
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 0.75rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid #EAEFFF;
+    margin-bottom: 8px;
+    padding: 0 2px 8px;
+    border-bottom: 1px solid var(--porty-border);
 `;
 
 const FAQTitle = styled.h3`
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: #414756;
     margin: 0;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--porty-text);
+    font-size: 14px;
+    font-weight: 700;
 
-    @media (max-width: 768px) {
-        font-size: 0.9rem;
+    svg {
+        color: var(--porty-primary);
     }
 `;
 
 const CloseButton = styled.button`
-    background: none;
-    border: none;
-    font-size: 1.2rem;
-    color: #999;
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: 12px;
+    background: transparent;
+    color: var(--porty-subtext);
     cursor: pointer;
-    padding: 0.25rem;
-    transition: color 0.2s ease;
 
     &:hover {
-        color: #414756;
-    }
-
-    @media (max-width: 768px) {
-        font-size: 1.1rem;
+        background: var(--porty-surface-soft);
+        color: var(--porty-text);
     }
 `;
 
 const FAQList = styled.div`
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 6px;
     max-height: 250px;
     overflow-y: auto;
 
@@ -170,7 +178,7 @@ const FAQList = styled.div`
     }
 
     &::-webkit-scrollbar-thumb {
-        background-color: #9DABCF;
+        background-color: var(--porty-primary);
         border-radius: 2px;
     }
 
@@ -183,61 +191,51 @@ const FAQList = styled.div`
 const FAQItem = styled.button`
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    padding: 0.75rem 1rem;
-    background: #EAEFFF;
-    border: none;
-    border-radius: 12px;
+    min-height: 46px;
+    gap: 10px;
+    padding: 9px 11px;
+    border: 1px solid transparent;
+    border-radius: 13px;
+    background: var(--porty-surface-soft);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 160ms ease;
     text-align: left;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 
     &:hover {
-        background: #9DABCF;
-        transform: translateX(4px);
-
-        span {
-            color: white;
-        }
+        border-color: var(--porty-primary);
+        background: var(--porty-primary-soft);
     }
 
     &:active {
-        transform: translateX(2px);
-    }
-
-    @media (max-width: 768px) {
-        padding: 0.65rem 0.85rem;
-        gap: 0.6rem;
+        transform: scale(0.99);
     }
 `;
 
 const QuestionIcon = styled.div`
-    font-size: 1.2rem;
-    flex-shrink: 0;
-
-    @media (max-width: 768px) {
-        font-size: 1.1rem;
-    }
+    width: 26px;
+    height: 26px;
+    flex: 0 0 26px;
+    display: grid;
+    place-items: center;
+    border-radius: 9px;
+    background: var(--porty-primary-soft);
+    color: var(--porty-primary-hover);
+    font-size: 12px;
+    font-weight: 800;
 `;
 
 const QuestionText = styled.span`
-    font-size: 0.9rem;
-    color: #414756;
+    color: var(--porty-text);
+    font-size: 13px;
+    font-weight: 550;
     line-height: 1.4;
-    transition: color 0.2s ease;
-
-    @media (max-width: 768px) {
-        font-size: 0.85rem;
-    }
 `;
 
 const NoResult = styled.div`
     padding: 1.5rem;
     text-align: center;
-    color: #999;
-    font-size: 0.9rem;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: var(--porty-subtext);
+    font-size: 13px;
 `;
 
 export default FAQPreview;

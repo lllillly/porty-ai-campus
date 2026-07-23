@@ -84,16 +84,16 @@ const Header = styled.div`
 const ReferenceBadge = styled.span`
   padding: 0.2rem 0.5rem;
   border-radius: 999px;
-  background: #fff4d8;
-  color: #8a6410;
+  background: #fff5d6;
+  color: #7a5810;
   font-size: 0.72rem;
   font-weight: 700;
 `;
 
 const Notice = styled(Text)`
   padding: 0.65rem;
-  border-radius: 8px;
-  background: #f5f7ff;
+  border-radius: 11px;
+  background: var(--porty-surface-soft);
   line-height: 1.5;
 `;
 
@@ -107,17 +107,17 @@ const SourceItem = styled.div`
   display: grid;
   gap: 0.25rem;
   padding: 0.65rem 0;
-  border-bottom: 1px solid #e9edf8;
+  border-bottom: 1px solid var(--porty-border);
 
   strong {
-    color: #414756;
+    color: var(--porty-text);
     font-size: 0.82rem;
   }
 
   span {
     display: -webkit-box;
     overflow: hidden;
-    color: #687086;
+    color: var(--porty-subtext);
     font-size: 0.78rem;
     line-height: 1.45;
     -webkit-box-orient: vertical;
@@ -131,7 +131,7 @@ const OfficialLink = styled.a`
   justify-content: center;
   gap: 0.35rem;
   margin-top: 0.7rem;
-  color: #6879ad;
+  color: var(--porty-primary-hover);
   font-size: 0.8rem;
   font-weight: 700;
   text-decoration: none;

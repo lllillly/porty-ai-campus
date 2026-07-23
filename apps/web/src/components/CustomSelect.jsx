@@ -7,14 +7,15 @@ const Wrapper = styled.div`
   position: relative;
 `;
 
-const SelectedBox = styled.div`
-  width: 90%;
-  padding: 0.85rem 1rem;
-  border-radius: 12px;
-  border: 1.4px solid #d5d9e2;
-  background: #f9fbff;
-  color: #333;
-  font-size: 1rem;
+const SelectedBox = styled.button`
+  width: 100%;
+  min-height: 48px;
+  padding: 0 14px;
+  border-radius: 13px;
+  border: 1px solid var(--porty-border);
+  background: var(--porty-surface-soft);
+  color: var(--porty-text);
+  font-size: 15px;
   cursor: pointer;
 
   display: flex;
@@ -24,7 +25,7 @@ const SelectedBox = styled.div`
   transition: 0.2s ease;
 
   &:hover {
-    border-color: #9DABCF;
+    border-color: var(--porty-primary);
   }
 `;
 
@@ -33,10 +34,10 @@ const Dropdown = styled.div`
   top: calc(100% + 6px);
   left: 0;
   width: 100%;
-  background: #ffffff;
-  border: 1.3px solid #d8dce7;
-  border-radius: 12px;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+  background: var(--porty-surface);
+  border: 1px solid var(--porty-border);
+  border-radius: 13px;
+  box-shadow: var(--porty-shadow);
   z-index: 3000;
 
   max-height: 220px;
@@ -55,20 +56,26 @@ const Dropdown = styled.div`
   }
 `;
 
-const Option = styled.div`
-  padding: 0.85rem 1rem;
-  font-size: 0.97rem;
+const Option = styled.button`
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 0;
+  background: transparent;
+  color: var(--porty-text);
+  font-size: 14px;
+  text-align: left;
   cursor: pointer;
   transition: background 0.15s;
 
   &:hover {
-    background: #f0f4ff;
+    background: var(--porty-primary-soft);
   }
 `;
 
 const Arrow = styled(ChevronDown)`
   font-size: 0.9rem;
-  color: #7a859d;
+  color: var(--porty-subtext);
 `;
 
 const CustomSelect = ({ value, onChange, options }) => {
@@ -88,16 +95,24 @@ const CustomSelect = ({ value, onChange, options }) => {
 
     return (
         <Wrapper ref={ref}>
-            <SelectedBox onClick={() => setOpen(!open)}>
+            <SelectedBox
+                type="button"
+                onClick={() => setOpen(!open)}
+                aria-haspopup="listbox"
+                aria-expanded={open}
+            >
                 <span>{value}</span>
                 <Arrow />
             </SelectedBox>
 
             {open && (
-                <Dropdown>
+                <Dropdown role="listbox">
                     {options.map((item) => (
                         <Option
+                            type="button"
                             key={item}
+                            role="option"
+                            aria-selected={item === value}
                             onClick={() => {
                                 onChange(item);
                                 setOpen(false);

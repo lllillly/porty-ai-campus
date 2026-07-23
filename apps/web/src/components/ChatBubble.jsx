@@ -8,13 +8,8 @@ const ChatBubble = ({ message, isUser, isDark }) => {
             {!isUser && (
                 <AvatarWrapper>
                     <img
-                        src="/assets/knung.png"
+                        src="/assets/porty-mark.svg"
                         alt="PORTY"
-                        style={{
-                            width: "40px",
-                            height: "40px",
-                            objectFit: "contain"
-                        }}
                     />
                 </AvatarWrapper>
             )}

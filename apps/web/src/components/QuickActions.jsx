@@ -1,7 +1,7 @@
 import React from "react";
 import { QuickActionsWrapper, QuickActionButton } from "../styles/ChatPage.styles";
 
-const QuickActions = ({ onActionClick, hasDietSettings }) => {
+const QuickActions = ({ onActionClick, hasDietSettings, isDark }) => {
     const baseActions = [
         { id: 1, label: "학사 일정", message: "학사 일정" },
         { id: 2, label: "찾아오시는 길", message: "찾아오시는 길" },
@@ -18,6 +18,7 @@ const QuickActions = ({ onActionClick, hasDietSettings }) => {
             {actions.map((action) => (
                 <QuickActionButton
                     key={action.id}
+                    $isDark={isDark}
                     onClick={() => onActionClick(action.message)}
                 >
                     {action.label}

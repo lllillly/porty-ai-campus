@@ -57,33 +57,38 @@ const HealthPage = () => {
 /* -------------------- 스타일 -------------------- */
 const Container = styled.div`
   height: 100vh;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background: #f7fbff;
-  font-family: "Pretendard", sans-serif;
+  padding: 24px;
+  background: var(--porty-canvas);
 `;
 
 const Title = styled.h2`
-  color: #414756;
-  margin-bottom: 1rem;
+  margin: 0 0 16px;
+  color: var(--porty-text);
+  font-size: 20px;
+  letter-spacing: -0.025em;
 `;
 
 const Table = styled.div`
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-  padding: 1.2rem 1.5rem;
-  width: 280px;
+  width: min(100%, 320px);
+  padding: 14px 18px;
+  border: 1px solid var(--porty-border);
+  border-radius: 18px;
+  background: var(--porty-surface);
+  box-shadow: var(--porty-shadow);
 `;
 
 const Row = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.4rem 0;
-  border-bottom: 1px solid #f0f0f0;
+  min-height: 48px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--porty-border);
 
   &:last-child {
     border-bottom: none;
@@ -92,12 +97,13 @@ const Row = styled.div`
 
 const Cell = styled.span`
   font-weight: 500;
-  color: #414756;
+  color: var(--porty-text);
 `;
 
 const Value = styled.span`
-  color: #9dabcF;
-  font-size: 0.9rem;
+  color: var(--porty-primary-hover);
+  font-size: 13px;
+  font-weight: 700;
 `;
 
 export default HealthPage;

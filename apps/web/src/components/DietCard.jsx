@@ -94,16 +94,16 @@ const StatusBadge = styled.span`
   flex: none;
   padding: 0.2rem 0.5rem;
   border-radius: 999px;
-  background: ${({ $active }) => ($active ? "#e7f8ed" : "#fff4d8")};
-  color: ${({ $active }) => ($active ? "#267a45" : "#8a6410")};
+  background: ${({ $active }) => ($active ? "var(--porty-primary-soft)" : "#fff5d6")};
+  color: ${({ $active }) => ($active ? "var(--porty-primary-hover)" : "#7a5810")};
   font-size: 0.7rem;
   font-weight: 700;
 `;
 
 const Notice = styled(Text)`
   padding: 0.75rem;
-  border-radius: 8px;
-  background: #f5f7ff;
+  border-radius: 11px;
+  background: var(--porty-surface-soft);
   line-height: 1.55;
 `;
 
@@ -111,9 +111,9 @@ const MealSection = styled.div`
   display: grid;
   gap: 0.25rem;
   padding: 0.75rem;
-  border-radius: 8px;
-  background: #f5f7ff;
-  color: #414756;
+  border-radius: 11px;
+  background: var(--porty-surface-soft);
+  color: var(--porty-text);
   font-size: 0.82rem;
 `;
 
@@ -123,7 +123,7 @@ const OfficialLink = styled.a`
   justify-content: center;
   gap: 0.35rem;
   margin-top: 0.8rem;
-  color: #6879ad;
+  color: var(--porty-primary-hover);
   font-size: 0.8rem;
   font-weight: 700;
   text-decoration: none;

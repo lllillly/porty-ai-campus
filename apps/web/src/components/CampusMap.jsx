@@ -26,19 +26,21 @@ const CampusMap = ({ onBackToMain }) => (
 const Card = styled(CommonCard)``;
 
 const Campus = styled.div`
-    margin-bottom: 0.6rem;
+    margin-bottom: 12px;
+    padding: 12px;
+    border-radius: 12px;
+    background: var(--porty-surface-soft);
 `;
 
 const MapButton = styled.a`
     display: inline-block;
-    background: #9dabcF;
-    color: #fff;
-    padding: 0.4rem 0.8rem;
-    border-radius: 8px;
-    font-size: 0.8rem;
+    margin-top: 4px;
+    color: var(--porty-primary-hover);
+    padding: 5px 0;
+    font-size: 13px;
+    font-weight: 700;
     text-decoration: none;
-    &:hover { background: #8a9bc5; }
+    &:hover { text-decoration: underline; text-underline-offset: 3px; }
 `;
 
 export default CampusMap;
-
