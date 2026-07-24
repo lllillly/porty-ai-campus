@@ -1,60 +1,61 @@
 import React, { useEffect, useState } from "react";
-import styled from "styled-components";
 import { CheckCircle, XCircle } from "react-feather";
+import styled from "styled-components";
+
 import { getSystemHealth } from "../api/healthApi";
 
-const HealthPage = () => {
-    const [status, setStatus] = useState({
-        web: "loading",
-        ai: "loading",
-        database: "loading",
-    });
-
-    useEffect(() => {
-        const fetchHealth = async () => {
-            try {
-                setStatus(await getSystemHealth());
-            } catch (error) {
-                console.error("Health check failed:", error);
-                setStatus({ web: "OK", ai: "FAIL", database: "FAIL" });
-            }
-        };
-
-        fetchHealth();
-    }, []);
-
-    const getIcon = (value) =>
-        value === "OK" ? (
-            <CheckCircle color="#52c41a" size={18} />
-        ) : (
-            <XCircle color="#ff4d4f" size={18} />
-        );
-
-    return (
-        <Container>
-            <Title>서버 상태 확인</Title>
-            <Table>
-                <Row>
-                    <Cell>웹 애플리케이션</Cell>
-                    <Cell>{getIcon(status.web)}</Cell>
-                    <Value>{status.web}</Value>
-                </Row>
-                <Row>
-                    <Cell>AI 서버</Cell>
-                    <Cell>{getIcon(status.ai)}</Cell>
-                    <Value>{status.ai}</Value>
-                </Row>
-                <Row>
-                    <Cell>Supabase</Cell>
-                    <Cell>{getIcon(status.database)}</Cell>
-                    <Value>{status.database}</Value>
-                </Row>
-            </Table>
-        </Container>
-    );
+const INITIAL_STATUS = {
+  web: "loading",
+  ai: "loading",
+  database: "loading",
 };
 
-/* -------------------- 스타일 -------------------- */
+const HealthPage = () => {
+  const [status, setStatus] = useState(INITIAL_STATUS);
+
+  useEffect(() => {
+    const fetchHealth = async () => {
+      try {
+        setStatus(await getSystemHealth());
+      } catch {
+        setStatus({ web: "OK", ai: "FAIL", database: "FAIL" });
+      }
+    };
+
+    fetchHealth();
+  }, []);
+
+  const getIcon = (value) =>
+    value === "OK" ? (
+      <CheckCircle color="#52c41a" size={18} />
+    ) : (
+      <XCircle color="#ff4d4f" size={18} />
+    );
+
+  return (
+    <Container>
+      <Title>서버 상태 확인</Title>
+      <Table>
+        <Row>
+          <Cell>웹 애플리케이션</Cell>
+          <Cell>{getIcon(status.web)}</Cell>
+          <Value>{status.web}</Value>
+        </Row>
+        <Row>
+          <Cell>AI 서버</Cell>
+          <Cell>{getIcon(status.ai)}</Cell>
+          <Value>{status.ai}</Value>
+        </Row>
+        <Row>
+          <Cell>Supabase</Cell>
+          <Cell>{getIcon(status.database)}</Cell>
+          <Value>{status.database}</Value>
+        </Row>
+      </Table>
+    </Container>
+  );
+};
+
 const Container = styled.div`
   height: 100vh;
   height: 100dvh;
@@ -83,21 +84,21 @@ const Table = styled.div`
 `;
 
 const Row = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding: 8px 0;
   border-bottom: 1px solid var(--porty-border);
 
   &:last-child {
-    border-bottom: none;
+    border-bottom: 0;
   }
 `;
 
 const Cell = styled.span`
-  font-weight: 500;
   color: var(--porty-text);
+  font-weight: 500;
 `;
 
 const Value = styled.span`

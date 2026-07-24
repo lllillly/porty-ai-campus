@@ -268,7 +268,7 @@ const ChatPage = () => {
             title="포티와 새 대화 시작하기"
             aria-label="포티와 새 대화 시작하기"
           >
-            <Logo src="/assets/knung-icon.png" alt="" $isDark={isDarkMode} />
+            <Logo src="/assets/knung-icon.png" alt="" />
             <BrandCopy>
               <BrandName $isDark={isDarkMode}>공주대 챗봇</BrandName>
               <BrandStatus $isDark={isDarkMode}>
@@ -285,7 +285,6 @@ const ChatPage = () => {
               aria-label="식단 설정 열기"
             >
               <Coffee size={18} />
-              <span>식단</span>
             </NotificationButton>
 
             <MenuButton
@@ -295,7 +294,6 @@ const ChatPage = () => {
               aria-label="포티 설정 열기"
             >
               <Settings size={18} />
-              <span>설정</span>
             </MenuButton>
           </HeaderActions>
         </HeaderContent>

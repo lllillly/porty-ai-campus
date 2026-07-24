@@ -22,7 +22,7 @@ const SelectedBox = styled.button`
   align-items: center;
   justify-content: space-between;
 
-  transition: 0.2s ease;
+  transition: border-color 160ms ease;
 
   &:hover {
     border-color: var(--porty-primary);
@@ -79,52 +79,53 @@ const Arrow = styled(ChevronDown)`
 `;
 
 const CustomSelect = ({ value, onChange, options }) => {
-    const [open, setOpen] = useState(false);
-    const ref = useRef();
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
 
-    // Dropdown 외부 클릭 시 닫기
-    useEffect(() => {
-        const handler = (e) => {
-            if (ref.current && !ref.current.contains(e.target)) {
+  useEffect(() => {
+    const closeOnOutsideClick = (event) => {
+      if (ref.current && !ref.current.contains(event.target)) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", closeOnOutsideClick);
+    return () =>
+      document.removeEventListener("mousedown", closeOnOutsideClick);
+  }, []);
+
+  return (
+    <Wrapper ref={ref}>
+      <SelectedBox
+        type="button"
+        onClick={() => setOpen((current) => !current)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+      >
+        <span>{value}</span>
+        <Arrow />
+      </SelectedBox>
+
+      {open && (
+        <Dropdown role="listbox">
+          {options.map((item) => (
+            <Option
+              type="button"
+              key={item}
+              role="option"
+              aria-selected={item === value}
+              onClick={() => {
+                onChange(item);
                 setOpen(false);
-            }
-        };
-        document.addEventListener("mousedown", handler);
-        return () => document.removeEventListener("mousedown", handler);
-    }, []);
-
-    return (
-        <Wrapper ref={ref}>
-            <SelectedBox
-                type="button"
-                onClick={() => setOpen(!open)}
-                aria-haspopup="listbox"
-                aria-expanded={open}
+              }}
             >
-                <span>{value}</span>
-                <Arrow />
-            </SelectedBox>
-
-            {open && (
-                <Dropdown role="listbox">
-                    {options.map((item) => (
-                        <Option
-                            type="button"
-                            key={item}
-                            role="option"
-                            aria-selected={item === value}
-                            onClick={() => {
-                                onChange(item);
-                                setOpen(false);
-                            }}
-                        >
-                            {item}
-                        </Option>
-                    ))}
-                </Dropdown>
-            )}
-        </Wrapper>
-    );
+              {item}
+            </Option>
+          ))}
+        </Dropdown>
+      )}
+    </Wrapper>
+  );
 };
 
 export default CustomSelect;

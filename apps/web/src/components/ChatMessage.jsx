@@ -1,14 +1,11 @@
 import React from "react";
+import styled from "styled-components";
 
 import ChatBubble from "./ChatBubble";
 import QuickActions from "./QuickActions";
 import ShuttleCard from "./ShuttleCard";
 import StudentNewsCard from "./StudentNewsCard";
 import WelcomeIntro from "./WelcomeIntro";
-
-const ComponentFrame = ({ children }) => (
-  <div style={{ display: "flex" }}>{children}</div>
-);
 
 const ChatMessage = ({
   chat,
@@ -31,18 +28,18 @@ const ChatMessage = ({
 
   if (chat.presentation?.type === "shuttle") {
     return (
-      <ComponentFrame>
+      <CardFrame>
         <ShuttleCard
           data={chat.presentation}
           onBackToMain={onBackToMain}
         />
-      </ComponentFrame>
+      </CardFrame>
     );
   }
 
   if (chat.presentation?.type === "student-news") {
     return (
-      <ComponentFrame>
+      <CardFrame>
         <StudentNewsCard
           data={chat.presentation}
           onRead={(index) =>
@@ -50,12 +47,12 @@ const ChatMessage = ({
           }
           onBackToMain={onBackToMain}
         />
-      </ComponentFrame>
+      </CardFrame>
     );
   }
 
   if (chat.component) {
-    return <ComponentFrame>{chat.component}</ComponentFrame>;
+    return <CardFrame>{chat.component}</CardFrame>;
   }
 
   return (
@@ -77,5 +74,9 @@ const ChatMessage = ({
     </>
   );
 };
+
+const CardFrame = styled.div`
+  display: flex;
+`;
 
 export default ChatMessage;

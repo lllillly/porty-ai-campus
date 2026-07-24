@@ -106,7 +106,9 @@ const SettingsModal = ({ isDarkMode, onToggleDarkMode, onClose }) => {
               type="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              onKeyDown={(event) => event.key === "Enter" && handleLogin()}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") handleLogin();
+              }}
               placeholder="name@example.com"
               autoComplete="email"
             />

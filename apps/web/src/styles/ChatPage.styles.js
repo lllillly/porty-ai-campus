@@ -146,10 +146,6 @@ const HeaderIconButton = styled.button`
     transform: scale(0.96);
   }
 
-  span {
-    display: none;
-  }
-
   @media (max-width: 520px) {
     width: 34px;
     height: 34px;
