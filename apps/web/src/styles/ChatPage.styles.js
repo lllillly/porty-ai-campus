@@ -1,13 +1,13 @@
 import styled from "styled-components";
 
 const palette = {
-  green: "#79C991",
-  greenHover: "#347B4F",
-  mint: "#EAF7EE",
-  canvas: "#F7FBF8",
-  text: "#203329",
-  subtext: "#6E7E74",
-  border: "#DFECE3",
+  green: "#72BD89",
+  greenHover: "#357653",
+  mint: "#EDF7F0",
+  canvas: "#FAFCFB",
+  text: "#26352D",
+  subtext: "#718078",
+  border: "#E1E9E3",
 };
 
 export const ChatContainer = styled.main`
@@ -24,23 +24,22 @@ export const ChatContainer = styled.main`
 `;
 
 export const Header = styled.header`
-  flex: 0 0 78px;
+  flex: 0 0 68px;
   display: flex;
   align-items: center;
   background: ${({ $isDark }) =>
     $isDark ? "rgba(29, 37, 33, 0.97)" : "rgba(255, 255, 255, 0.97)"};
   border-bottom: 1px solid
     ${({ $isDark }) => ($isDark ? "#34413A" : palette.border)};
-  backdrop-filter: blur(16px);
   z-index: 30;
 
   @media (max-width: 768px) {
-    flex-basis: 70px;
+    flex-basis: 64px;
   }
 `;
 
 export const HeaderContent = styled.div`
-  width: min(100%, 920px);
+  width: min(100%, 820px);
   min-width: 0;
   margin: 0 auto;
   padding: 0 24px;
@@ -58,10 +57,10 @@ export const BrandButton = styled.button`
   min-width: 0;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 5px 12px 5px 8px;
+  gap: 10px;
+  padding: 4px 8px 4px 4px;
   border: 0;
-  border-radius: 18px;
+  border-radius: 10px;
   background: transparent;
   color: inherit;
   cursor: pointer;
@@ -74,21 +73,21 @@ export const BrandButton = styled.button`
 `;
 
 export const Logo = styled.img`
-  width: 46px;
-  height: 46px;
-  flex: 0 0 46px;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
   padding: 0;
   border: 0;
-  border-radius: 15px;
+  border-radius: 10px;
   background: var(--porty-primary-soft);
   object-fit: cover;
   object-position: center top;
 
   @media (max-width: 768px) {
-    width: 42px;
-    height: 42px;
-    flex-basis: 42px;
-    border-radius: 14px;
+    width: 38px;
+    height: 38px;
+    flex-basis: 38px;
+    border-radius: 9px;
   }
 `;
 
@@ -108,24 +107,11 @@ export const BrandName = styled.strong`
 
 export const BrandStatus = styled.span`
   display: block;
-  position: relative;
-  padding-left: 10px;
   color: ${({ $isDark }) => ($isDark ? "#AEB8B3" : palette.subtext)};
   font-size: 10.5px;
   font-weight: 550;
   line-height: 1.2;
 
-  &::before {
-    width: 6px;
-    height: 6px;
-    position: absolute;
-    top: 50%;
-    left: 0;
-    transform: translateY(-50%);
-    border-radius: 50%;
-    background: var(--porty-primary);
-    content: "";
-  }
 `;
 
 export const HeaderActions = styled.div`
@@ -133,26 +119,19 @@ export const HeaderActions = styled.div`
   align-items: center;
   gap: 8px;
 
-  > button:first-child {
-    background: var(--porty-primary-soft);
-  }
-
-  > button:last-child {
-    background: var(--porty-surface);
-  }
 `;
 
 const HeaderIconButton = styled.button`
   width: auto;
-  height: 44px;
+  height: 38px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 0 13px;
+  padding: 0 11px;
   border: 1px solid
     ${({ $isDark }) => ($isDark ? "#34413A" : palette.border)};
-  border-radius: 14px;
+  border-radius: 10px;
   background: ${({ $isDark }) => ($isDark ? "#252E29" : "#FFFFFF")};
   color: ${({ $isDark }) => ($isDark ? "#D8DEDB" : "#426050")};
   font-size: 12px;
@@ -191,7 +170,7 @@ export const ChatBody = styled.section`
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: clamp(24px, 5vh, 48px) 24px 34px;
+  padding: clamp(30px, 6vh, 64px) 24px 38px;
   display: flex;
   flex-direction: column;
   gap: 18px;
@@ -229,94 +208,49 @@ export const ChatBody = styled.section`
 `;
 
 export const WelcomeCard = styled.section`
-  width: min(100%, 820px);
+  width: min(100%, 720px);
   min-width: 0;
   margin: 0 auto;
-  display: grid;
-  grid-template:
-    "scene prompt" auto
-    "scene actions" 1fr / minmax(290px, 0.92fr) minmax(0, 1.08fr);
-  column-gap: clamp(24px, 4vw, 46px);
-  align-items: start;
+  display: flex;
+  flex-direction: column;
 
   @media (max-width: 720px) {
-    grid-template:
-      "scene" auto
-      "prompt" auto
-      "actions" auto / 1fr;
-    gap: 0;
+    width: 100%;
   }
 `;
 
 export const WelcomeCopy = styled.div`
-  grid-area: scene;
-  min-height: 404px;
+  min-height: 210px;
   position: relative;
   overflow: hidden;
-  padding: 30px;
-  border-radius: 38px 38px 38px 14px;
-  background: ${({ $isDark }) => ($isDark ? "#213C31" : "#E7F7EF")};
-
-  &::before,
-  &::after {
-    position: absolute;
-    border-radius: 50%;
-    content: "";
-  }
-
-  &::before {
-    width: 84px;
-    height: 84px;
-    top: -28px;
-    right: 30px;
-    background: ${({ $isDark }) => ($isDark ? "#2B493B" : "#F8FCF9")};
-  }
-
-  &::after {
-    width: 48px;
-    height: 48px;
-    bottom: 26px;
-    left: 24px;
-    background: ${({ $isDark }) => ($isDark ? "#294438" : "#CDEBD6")};
-  }
+  padding: 38px 220px 34px 36px;
+  border: 1px solid
+    ${({ $isDark }) => ($isDark ? "#34413A" : palette.border)};
+  border-radius: 20px;
+  background: ${({ $isDark }) => ($isDark ? "#1D2521" : "#FFFFFF")};
 
   > div:last-child {
-    width: min(100%, 270px);
     position: relative;
     z-index: 2;
-    padding: 21px 22px;
-    border-radius: 25px 25px 25px 8px;
-    background: var(--porty-surface);
-    box-shadow: 0 12px 30px rgba(80, 105, 91, 0.08);
   }
 
   @media (max-width: 720px) {
-    min-height: 270px;
-    padding: 22px;
-    margin-bottom: 28px;
-
-    > div:last-child {
-      width: min(72%, 310px);
-      padding: 17px 18px;
-    }
+    min-height: 190px;
+    padding: 28px 150px 26px 24px;
   }
 
   @media (max-width: 420px) {
-    min-height: 252px;
-    padding: 18px;
-
-    > div:last-child {
-      width: 76%;
-    }
+    min-height: 176px;
+    padding: 24px 116px 22px 20px;
   }
 `;
 
 export const WelcomeCharacter = styled.div`
-  width: 230px;
-  height: 300px;
+  width: 180px;
+  height: 205px;
   position: absolute;
-  right: -7px;
-  bottom: -19px;
+  right: 22px;
+  bottom: -16px;
   z-index: 1;
 
   img {
@@ -328,31 +262,31 @@ export const WelcomeCharacter = styled.div`
   }
 
   @media (max-width: 720px) {
-    width: 164px;
-    height: 226px;
-    right: 5px;
-    bottom: -20px;
+    width: 135px;
+    height: 175px;
+    right: 8px;
+    bottom: -14px;
   }
 
   @media (max-width: 420px) {
-    width: 145px;
-    height: 205px;
-    right: -2px;
+    width: 110px;
+    height: 150px;
+    right: 3px;
   }
 `;
 
 export const WelcomeTitle = styled.h1`
   margin: 0;
   color: var(--porty-text);
-  font-size: clamp(22px, 2.4vw, 28px);
-  font-weight: 780;
+  font-size: clamp(22px, 3vw, 28px);
+  font-weight: 760;
   letter-spacing: -0.04em;
   line-height: 1.32;
   word-break: keep-all;
 `;
 
 export const WelcomeDescription = styled.p`
-  margin: 9px 0 0;
+  margin: 12px 0 0;
   color: var(--porty-subtext);
   font-size: 13px;
   font-weight: 450;
@@ -365,15 +299,14 @@ export const WelcomeDescription = styled.p`
 `;
 
 export const WelcomePrompt = styled.p`
-  grid-area: prompt;
-  margin: 10px 0 15px;
+  margin: 28px 4px 12px;
   display: grid;
   gap: 4px;
 
   span {
     color: var(--porty-text);
-    font-size: 18px;
-    font-weight: 760;
+    font-size: 16px;
+    font-weight: 730;
     letter-spacing: -0.025em;
   }
 
@@ -384,7 +317,7 @@ export const WelcomePrompt = styled.p`
   }
 
   @media (max-width: 720px) {
-    margin: 0 2px 14px;
+    margin: 24px 2px 11px;
   }
 `;
 
@@ -402,7 +335,7 @@ export const AvatarWrapper = styled.div`
   padding: 0;
   overflow: hidden;
   border: 0;
-  border-radius: 14px;
+  border-radius: 10px;
   background: var(--porty-primary-soft);
 
   img {
@@ -417,9 +350,11 @@ export const AvatarWrapper = styled.div`
 export const MessageBubble = styled.div`
   max-width: min(78%, 640px);
   padding: 12px 15px;
-  border: 0;
+  border: 1px solid
+    ${({ $isDark, $isUser }) =>
+      $isUser || $isDark ? "transparent" : palette.border};
   border-radius: ${({ $isUser }) =>
-    $isUser ? "20px 20px 7px 20px" : "20px 20px 20px 7px"};
+    $isUser ? "16px 16px 5px 16px" : "16px 16px 16px 5px"};
   background: ${({ $isDark, $isUser }) =>
     $isUser
       ? $isDark
@@ -430,8 +365,7 @@ export const MessageBubble = styled.div`
         : "#FFFFFF"};
   color: ${({ $isDark, $isUser }) =>
     $isUser ? ($isDark ? "#F2FFF8" : "#214636") : $isDark ? "#F5F7F6" : palette.text};
-  box-shadow: ${({ $isDark, $isUser }) =>
-    !$isDark && !$isUser ? "0 8px 24px rgba(52, 96, 70, 0.07)" : "none"};
+  box-shadow: none;
   font-size: 14px;
   font-weight: 450;
   line-height: 1.58;
@@ -503,7 +437,6 @@ export const MessageBubble = styled.div`
 `;
 
 export const QuickActionsWrapper = styled.div`
-  grid-area: ${({ $featured }) => ($featured ? "actions" : "auto")};
   width: ${({ $featured }) =>
     $featured ? "100%" : "min(calc(100% - 53px), 680px)"};
   min-width: 0;
@@ -511,9 +444,15 @@ export const QuickActionsWrapper = styled.div`
   display: grid;
   grid-template-columns: ${({ $featured }) =>
     $featured
-      ? "repeat(2, minmax(0, 1fr))"
+      ? "repeat(3, minmax(0, 1fr))"
       : "repeat(3, minmax(0, 1fr))"};
-  gap: ${({ $featured }) => ($featured ? "10px" : "8px")};
+  gap: ${({ $featured }) => ($featured ? "1px" : "8px")};
+  overflow: ${({ $featured }) => ($featured ? "hidden" : "visible")};
+  border-radius: ${({ $featured }) => ($featured ? "16px" : "0")};
+  background: ${({ $featured }) =>
+    $featured ? "var(--porty-border)" : "transparent"};
+  box-shadow: ${({ $featured }) =>
+    $featured ? "0 0 0 1px var(--porty-border)" : "none"};
 
   @media (max-width: 620px) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -522,21 +461,18 @@ export const QuickActionsWrapper = styled.div`
 
 export const QuickActionButton = styled.button`
   min-width: 0;
-  min-height: ${({ $featured }) => ($featured ? "92px" : "66px")};
+  min-height: ${({ $featured }) => ($featured ? "76px" : "66px")};
   position: relative;
   display: flex;
   align-items: center;
   gap: 9px;
-  padding: ${({ $featured }) => ($featured ? "15px" : "10px")};
+  padding: ${({ $featured }) => ($featured ? "13px 14px" : "10px")};
   border: 0;
-  border-radius: ${({ $featured }) => ($featured ? "20px" : "15px")};
-  background: ${({ $isDark }) => ($isDark ? "#1D2521" : "#FFFEFA")};
+  border-radius: ${({ $featured }) => ($featured ? "0" : "15px")};
+  background: ${({ $isDark }) => ($isDark ? "#1D2521" : "#FFFFFF")};
   color: ${({ $isDark }) => ($isDark ? "#E7ECE9" : "#315245")};
   text-align: left;
-  box-shadow: ${({ $featured, $isDark }) =>
-    $featured && !$isDark
-      ? "0 8px 22px rgba(70, 91, 80, 0.055)"
-      : "none"};
+  box-shadow: none;
   cursor: pointer;
   transition:
     border-color 160ms ease,
@@ -544,39 +480,14 @@ export const QuickActionButton = styled.button`
     transform 160ms ease;
 
   > span {
-    width: ${({ $featured }) => ($featured ? "42px" : "32px")};
-    height: ${({ $featured }) => ($featured ? "42px" : "32px")};
-    flex: 0 0 ${({ $featured }) => ($featured ? "42px" : "32px")};
+    width: ${({ $featured }) => ($featured ? "36px" : "32px")};
+    height: ${({ $featured }) => ($featured ? "36px" : "32px")};
+    flex: 0 0 ${({ $featured }) => ($featured ? "36px" : "32px")};
     display: grid;
     place-items: center;
-    border-radius: 14px;
+    border-radius: 10px;
     background: var(--porty-primary-soft);
     color: var(--porty-primary-hover);
-  }
-
-  &:nth-child(2) > span {
-    background: #f0f9f2;
-    color: #4b825e;
-  }
-
-  &:nth-child(3) > span {
-    background: #e4f4e9;
-    color: #3e7651;
-  }
-
-  &:nth-child(4) > span {
-    background: #edf8f0;
-    color: #558966;
-  }
-
-  &:nth-child(5) > span {
-    background: ${({ $isDark }) => ($isDark ? "#294438" : "#E6F5EA")};
-    color: ${({ $isDark }) => ($isDark ? "#A6D8B5" : "#347B4F")};
-  }
-
-  &:nth-child(6) > span {
-    background: ${({ $isDark }) => ($isDark ? "#304B3E" : "#F2FAF4")};
-    color: ${({ $isDark }) => ($isDark ? "#B8DEC3" : "#5A8B69")};
   }
 
   > div {
@@ -601,12 +512,11 @@ export const QuickActionButton = styled.button`
   }
 
   &:hover {
-    background: ${({ $isDark }) => ($isDark ? "#223A2F" : "#F9FBF8")};
-    transform: translateY(-2px);
+    background: ${({ $isDark }) => ($isDark ? "#223A2F" : "#F6FAF7")};
   }
 
   @media (max-width: 480px) {
-    min-height: ${({ $featured }) => ($featured ? "84px" : "66px")};
+    min-height: ${({ $featured }) => ($featured ? "74px" : "66px")};
     padding: ${({ $featured }) => ($featured ? "12px 11px" : "10px")};
 
     > div {
@@ -623,11 +533,12 @@ export const QuickActionButton = styled.button`
 
 export const InputArea = styled.footer`
   flex: 0 0 auto;
-  padding: 16px 24px max(17px, env(safe-area-inset-bottom));
-  border-top: 0;
-  border-radius: 28px 28px 0 0;
+  padding: 13px 24px max(14px, env(safe-area-inset-bottom));
+  border-top: 1px solid
+    ${({ $isDark }) => ($isDark ? "#34413A" : palette.border)};
+  border-radius: 0;
   background: ${({ $isDark }) =>
-    $isDark ? "#1D2521" : "#E8F6EC"};
+    $isDark ? "#1D2521" : "#FFFFFF"};
   z-index: 25;
 
   @media (max-width: 768px) {
@@ -637,20 +548,21 @@ export const InputArea = styled.footer`
 
 export const InputWrapper = styled.div`
   width: min(100%, 820px);
-  min-height: 58px;
+  min-height: 52px;
   margin: 0 auto;
   padding: 7px 8px 7px 15px;
   display: flex;
   align-items: center;
   gap: 10px;
-  border: 0;
-  border-radius: 22px;
+  border: 1px solid
+    ${({ $isDark }) => ($isDark ? "#46514B" : "#CFDDD3")};
+  border-radius: 14px;
   background: ${({ $isDark }) => ($isDark ? "#252E29" : "#FFFFFF")};
-  box-shadow: ${({ $isDark }) =>
-    $isDark ? "none" : "0 7px 22px rgba(76, 105, 89, 0.08)"};
+  box-shadow: none;
 
   &:focus-within {
     background: var(--porty-surface);
+    border-color: var(--porty-primary);
   }
 `;
 
@@ -683,13 +595,13 @@ export const StyledInput = styled.input`
 `;
 
 export const SendButton = styled.button`
-  width: 42px;
-  height: 42px;
-  flex: 0 0 42px;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
   display: grid;
   place-items: center;
   border: 0;
-  border-radius: 50%;
+  border-radius: 11px;
   background: ${({ disabled }) => (disabled ? "#B9C5BF" : palette.green)};
   color: ${({ disabled }) => (disabled ? "#66716C" : "#10251A")};
   cursor: ${({ disabled }) => (disabled ? "default" : "pointer")};

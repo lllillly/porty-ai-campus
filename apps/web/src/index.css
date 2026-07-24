@@ -3,21 +3,21 @@
 }
 
 :root {
-  --porty-primary: #79c991;
-  --porty-primary-hover: #347b4f;
-  --porty-primary-soft: #eaf7ee;
-  --porty-accent: #a9dbb7;
-  --porty-accent-soft: #f0f9f2;
-  --porty-accent-text: #3d7650;
-  --porty-blush: #f2faf4;
-  --porty-lavender: #e7f5eb;
-  --porty-canvas: #f7fbf8;
+  --porty-primary: #72bd89;
+  --porty-primary-hover: #357653;
+  --porty-primary-soft: #edf7f0;
+  --porty-accent: #acd8b8;
+  --porty-accent-soft: #f4f9f5;
+  --porty-accent-text: #477657;
+  --porty-blush: #f8fbf8;
+  --porty-lavender: #eff7f1;
+  --porty-canvas: #fafcfb;
   --porty-surface: #ffffff;
-  --porty-surface-soft: #f1f8f3;
-  --porty-text: #203329;
-  --porty-subtext: #6e7e74;
-  --porty-border: #dfece3;
-  --porty-shadow: 0 16px 38px rgba(52, 96, 70, 0.08);
+  --porty-surface-soft: #f5f8f6;
+  --porty-text: #26352d;
+  --porty-subtext: #718078;
+  --porty-border: #e1e9e3;
+  --porty-shadow: 0 10px 28px rgba(48, 72, 58, 0.07);
 }
 
 :root[data-theme="dark"] {

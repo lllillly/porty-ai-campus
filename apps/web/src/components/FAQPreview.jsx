@@ -97,11 +97,10 @@ const PreviewPanel = styled.aside`
   width: min(calc(100% - 48px), 820px);
   margin: 0 auto;
   padding: 14px;
-  border: 0;
-  border-radius: 24px 24px 24px 10px;
-  background: color-mix(in srgb, var(--porty-surface) 97%, transparent);
-  box-shadow: 0 20px 48px rgba(64, 87, 75, 0.15);
-  backdrop-filter: blur(18px);
+  border: 1px solid var(--porty-border);
+  border-radius: 16px;
+  background: var(--porty-surface);
+  box-shadow: 0 12px 32px rgba(45, 67, 54, 0.1);
   animation: preview-in 180ms ease-out;
   z-index: 200;
 
@@ -186,9 +185,9 @@ const QuestionButton = styled.button`
   align-items: center;
   gap: 10px;
   padding: 9px 11px;
-  border: 0;
-  border-radius: 16px 16px 16px 7px;
-  background: var(--porty-surface-soft);
+  border: 1px solid var(--porty-border);
+  border-radius: 11px;
+  background: var(--porty-surface);
   color: var(--porty-text);
   cursor: pointer;
   text-align: left;
@@ -196,17 +195,9 @@ const QuestionButton = styled.button`
     background 150ms ease,
     transform 150ms ease;
 
-  &:nth-child(3n + 2) {
-    background: color-mix(in srgb, var(--porty-primary-soft) 72%, var(--porty-surface));
-  }
-
-  &:nth-child(3n) {
-    background: color-mix(in srgb, var(--porty-primary-soft) 46%, var(--porty-surface));
-  }
-
   &:hover {
+    border-color: var(--porty-primary);
     background: var(--porty-primary-soft);
-    transform: translateY(-1px);
   }
 
   span:last-child {
@@ -225,8 +216,8 @@ const QuestionMark = styled.span`
   flex: 0 0 26px;
   display: grid;
   place-items: center;
-  border-radius: 9px;
-  background: var(--porty-primary-soft);
+  border-radius: 8px;
+  background: transparent;
   color: var(--porty-primary-hover);
   font-size: 11px;
   font-weight: 800;
