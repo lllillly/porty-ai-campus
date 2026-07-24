@@ -1,13 +1,14 @@
 import styled from "styled-components";
 
 const palette = {
-  green: "#08B86A",
-  greenHover: "#079D5B",
-  mint: "#DDF7EA",
-  canvas: "#EEF5F2",
-  text: "#171C1A",
-  subtext: "#65706B",
-  border: "#DFE7E3",
+  green: "#78D6AD",
+  greenHover: "#348F6B",
+  mint: "#E4F8EF",
+  yellow: "#FFD879",
+  canvas: "#F5F8F3",
+  text: "#26352F",
+  subtext: "#718079",
+  border: "#DFE9E2",
 };
 
 export const ChatContainer = styled.main`
@@ -19,23 +20,25 @@ export const ChatContainer = styled.main`
   overflow: hidden;
   position: relative;
   z-index: 0;
-  background: ${({ $isDark }) => ($isDark ? "#111513" : palette.canvas)};
+  background: ${({ $isDark }) => ($isDark ? "#141A17" : palette.canvas)};
   color: ${({ $isDark }) => ($isDark ? "#F5F7F6" : palette.text)};
 `;
 
 export const Header = styled.header`
-  flex: 0 0 72px;
+  flex: 0 0 78px;
   display: flex;
   align-items: center;
   background: ${({ $isDark }) =>
-    $isDark ? "rgba(27, 33, 30, 0.96)" : "rgba(255, 255, 255, 0.96)"};
+    $isDark ? "rgba(29, 37, 33, 0.95)" : "rgba(255, 254, 250, 0.93)"};
   border-bottom: 1px solid
-    ${({ $isDark }) => ($isDark ? "#303934" : palette.border)};
-  backdrop-filter: blur(16px);
+    ${({ $isDark }) => ($isDark ? "#34413A" : "#E2EAE4")};
+  box-shadow: ${({ $isDark }) =>
+    $isDark ? "none" : "0 7px 24px rgba(65, 98, 80, 0.05)"};
+  backdrop-filter: blur(20px);
   z-index: 30;
 
   @media (max-width: 768px) {
-    flex-basis: 64px;
+    flex-basis: 70px;
   }
 `;
 
@@ -68,29 +71,35 @@ export const BrandButton = styled.button`
 `;
 
 export const Logo = styled.img`
-  width: 42px;
-  height: 42px;
-  flex: 0 0 42px;
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  padding: 2px;
+  border: 2px solid
+    ${({ $isDark }) => ($isDark ? "#405047" : "#FFFFFF")};
+  border-radius: 17px 17px 17px 7px;
+  background: ${({ $isDark }) => ($isDark ? "#2A352F" : "#FFF3CF")};
+  box-shadow: 0 8px 18px rgba(90, 116, 98, 0.14);
   object-fit: contain;
 
   @media (max-width: 768px) {
-    width: 38px;
-    height: 38px;
-    flex-basis: 38px;
+    width: 43px;
+    height: 43px;
+    flex-basis: 43px;
   }
 `;
 
 export const BrandCopy = styled.span`
   min-width: 0;
   display: grid;
-  gap: 2px;
+  gap: 3px;
 `;
 
 export const BrandName = styled.strong`
   color: ${({ $isDark }) => ($isDark ? "#F5F7F6" : palette.text)};
-  font-size: 16px;
-  font-weight: 750;
-  letter-spacing: -0.02em;
+  font-size: 18px;
+  font-weight: 850;
+  letter-spacing: -0.04em;
   line-height: 1.15;
 `;
 
@@ -99,16 +108,16 @@ export const BrandStatus = styled.span`
   align-items: center;
   gap: 5px;
   color: ${({ $isDark }) => ($isDark ? "#AEB8B3" : palette.subtext)};
-  font-size: 12px;
-  font-weight: 500;
+  font-size: 11px;
+  font-weight: 650;
   line-height: 1.2;
 
   &::before {
-    width: 7px;
-    height: 7px;
+    width: 6px;
+    height: 6px;
     border-radius: 50%;
     background: ${palette.green};
-    box-shadow: 0 0 0 3px rgba(8, 184, 106, 0.14);
+    box-shadow: 0 0 0 3px rgba(120, 214, 173, 0.18);
     content: "";
   }
 `;
@@ -120,13 +129,14 @@ export const HeaderActions = styled.div`
 `;
 
 const HeaderIconButton = styled.button`
-  width: 44px;
-  height: 44px;
+  width: 42px;
+  height: 42px;
   display: grid;
   place-items: center;
-  border: 0;
+  border: 1px solid
+    ${({ $isDark }) => ($isDark ? "#34413A" : "#E3ECE6")};
   border-radius: 14px;
-  background: transparent;
+  background: ${({ $isDark }) => ($isDark ? "#252E29" : "#F7FAF7")};
   color: ${({ $isDark }) => ($isDark ? "#D8DEDB" : "#4F5C56")};
   cursor: pointer;
   transition:
@@ -135,7 +145,7 @@ const HeaderIconButton = styled.button`
     transform 160ms ease;
 
   &:hover {
-    background: ${({ $isDark }) => ($isDark ? "#242B27" : "#F1F6F3")};
+    background: ${({ $isDark }) => ($isDark ? "#213C31" : "#EAF8F1")};
     color: ${({ $isDark }) => ($isDark ? "#24D184" : palette.greenHover)};
   }
 
@@ -152,19 +162,36 @@ export const ChatBody = styled.section`
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 30px 24px 36px;
+  padding: 32px 24px 38px;
   display: flex;
   flex-direction: column;
   gap: 18px;
   background:
     radial-gradient(
-      circle at 18% -10%,
+      circle at 12% 2%,
       ${({ $isDark }) =>
-          $isDark ? "rgba(8, 184, 106, 0.08)" : "rgba(255, 255, 255, 0.92)"}
-        0,
-      transparent 34%
+          $isDark ? "rgba(105, 207, 164, 0.08)" : "rgba(228, 248, 239, 0.9)"}
+        0 80px,
+      transparent 260px
     ),
-    ${({ $isDark }) => ($isDark ? "#111513" : palette.canvas)};
+    radial-gradient(
+      circle at 88% 12%,
+      ${({ $isDark }) =>
+          $isDark ? "rgba(229, 189, 94, 0.06)" : "rgba(255, 243, 207, 0.8)"}
+        0 55px,
+      transparent 220px
+    ),
+    radial-gradient(
+      circle,
+      ${({ $isDark }) => ($isDark ? "#26312B" : "#DDE9E1")} 1px,
+      transparent 1px
+    ),
+    ${({ $isDark }) => ($isDark ? "#141A17" : palette.canvas)};
+  background-size:
+    auto,
+    auto,
+    22px 22px,
+    auto;
 
   > div {
     width: min(100%, 820px);
@@ -196,16 +223,19 @@ export const MessageWrapper = styled.div`
   display: flex;
   align-items: flex-start;
   justify-content: ${({ $isUser }) => ($isUser ? "flex-end" : "flex-start")};
-  gap: 10px;
+  gap: 11px;
 `;
 
 export const AvatarWrapper = styled.div`
-  width: 38px;
-  height: 38px;
-  flex: 0 0 38px;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  padding: 2px;
   overflow: hidden;
-  border-radius: 13px;
-  box-shadow: 0 4px 12px rgba(8, 89, 53, 0.13);
+  border: 2px solid ${({ $isDark }) => ($isDark ? "#34413A" : "#FFFFFF")};
+  border-radius: 15px 15px 15px 5px;
+  background: var(--porty-accent-soft);
+  box-shadow: 0 6px 16px rgba(74, 107, 89, 0.12);
 
   img {
     width: 100%;
@@ -216,19 +246,29 @@ export const AvatarWrapper = styled.div`
 `;
 
 export const MessageBubble = styled.div`
-  max-width: min(76%, 620px);
-  padding: 11px 14px;
+  max-width: min(78%, 640px);
+  padding: 12px 15px;
   border: 1px solid
     ${({ $isDark, $isUser }) =>
-      $isUser ? "transparent" : $isDark ? "#303934" : palette.border};
+      $isUser ? "rgba(87, 164, 128, 0.12)" : $isDark ? "#34413A" : "#E1EAE4"};
   border-radius: ${({ $isUser }) =>
-    $isUser ? "18px 6px 18px 18px" : "6px 18px 18px 18px"};
+    $isUser ? "19px 7px 19px 19px" : "7px 19px 19px 19px"};
   background: ${({ $isDark, $isUser }) =>
-    $isUser ? palette.green : $isDark ? "#1B211E" : "#FFFFFF"};
+    $isUser
+      ? $isDark
+        ? "#2C6B52"
+        : "#D9F5E8"
+      : $isDark
+        ? "#1D2521"
+        : "#FFFEFA"};
   box-shadow: ${({ $isUser, $isDark }) =>
-    $isUser || $isDark ? "none" : "0 8px 24px rgba(28, 54, 42, 0.06)"};
+    $isDark
+      ? "none"
+      : $isUser
+        ? "0 6px 16px rgba(57, 126, 91, 0.08)"
+        : "0 9px 25px rgba(54, 91, 72, 0.08)"};
   color: ${({ $isDark, $isUser }) =>
-    $isUser ? "#10251A" : $isDark ? "#F5F7F6" : palette.text};
+    $isUser ? ($isDark ? "#F2FFF8" : "#214636") : $isDark ? "#F5F7F6" : palette.text};
   font-size: 14px;
   font-weight: 450;
   line-height: 1.58;
@@ -260,10 +300,37 @@ export const MessageBubble = styled.div`
   }
 
   a {
-    color: inherit;
-    font-weight: 700;
-    text-decoration-thickness: 1px;
-    text-underline-offset: 3px;
+    width: fit-content;
+    max-width: 100%;
+    min-height: 34px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 3px;
+    padding: 7px 10px;
+    border: 1px solid var(--porty-border);
+    border-radius: 11px;
+    background: var(--porty-surface-soft);
+    color: var(--porty-primary-hover);
+    font-size: 12px;
+    font-weight: 750;
+    line-height: 1.35;
+    text-decoration: none;
+
+    span {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    svg {
+      flex: 0 0 auto;
+    }
+
+    &:hover {
+      border-color: var(--porty-primary);
+      background: var(--porty-primary-soft);
+    }
   }
 
   @media (max-width: 560px) {
@@ -273,39 +340,70 @@ export const MessageBubble = styled.div`
 `;
 
 export const QuickActionsWrapper = styled.div`
-  max-width: calc(100% - 48px);
-  margin: 10px 0 0 48px;
-  padding: 2px 0;
-  display: flex;
+  width: min(calc(100% - 53px), 620px);
+  margin: 12px 0 0 53px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
-  overflow-x: auto;
-  scrollbar-width: none;
 
-  &::-webkit-scrollbar {
-    display: none;
+  @media (max-width: 620px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 `;
 
 export const QuickActionButton = styled.button`
-  min-height: 40px;
-  flex: 0 0 auto;
-  padding: 9px 14px;
+  min-width: 0;
+  min-height: 66px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px;
   border: 1px solid
-    ${({ $isDark }) => ($isDark ? "#3B4740" : "#C8D8D0")};
-  border-radius: 999px;
-  background: ${({ $isDark }) => ($isDark ? "#1B211E" : "#FFFFFF")};
+    ${({ $isDark }) => ($isDark ? "#34413A" : "#E0E9E3")};
+  border-radius: 16px 16px 16px 6px;
+  background: ${({ $isDark }) => ($isDark ? "#1D2521" : "#FFFEFA")};
   color: ${({ $isDark }) => ($isDark ? "#E7ECE9" : "#315245")};
-  font-size: 13px;
-  font-weight: 650;
-  white-space: nowrap;
+  text-align: left;
   cursor: pointer;
   transition:
     border-color 160ms ease,
     background 160ms ease,
     transform 160ms ease;
 
+  > span {
+    width: 32px;
+    height: 32px;
+    flex: 0 0 32px;
+    display: grid;
+    place-items: center;
+    border-radius: 11px;
+    background: var(--porty-primary-soft);
+    color: var(--porty-primary-hover);
+  }
+
+  > div {
+    min-width: 0;
+    display: grid;
+    gap: 2px;
+  }
+
+  strong {
+    color: var(--porty-text);
+    font-size: 12px;
+    font-weight: 760;
+    white-space: nowrap;
+  }
+
+  small {
+    overflow: hidden;
+    color: var(--porty-subtext);
+    font-size: 9px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   &:hover {
-    border-color: ${palette.green};
+    border-color: var(--porty-primary);
     background: ${({ $isDark }) => ($isDark ? "#223A2F" : palette.mint)};
     transform: translateY(-1px);
   }
@@ -313,12 +411,12 @@ export const QuickActionButton = styled.button`
 
 export const InputArea = styled.footer`
   flex: 0 0 auto;
-  padding: 16px 24px max(16px, env(safe-area-inset-bottom));
+  padding: 14px 24px max(15px, env(safe-area-inset-bottom));
   border-top: 1px solid
-    ${({ $isDark }) => ($isDark ? "#303934" : palette.border)};
+    ${({ $isDark }) => ($isDark ? "#34413A" : "#E1E9E3")};
   background: ${({ $isDark }) =>
-    $isDark ? "rgba(27, 33, 30, 0.98)" : "rgba(255, 255, 255, 0.97)"};
-  backdrop-filter: blur(16px);
+    $isDark ? "rgba(29, 37, 33, 0.96)" : "rgba(255, 254, 250, 0.94)"};
+  backdrop-filter: blur(20px);
   z-index: 25;
 
   @media (max-width: 768px) {
@@ -328,24 +426,25 @@ export const InputArea = styled.footer`
 
 export const InputWrapper = styled.div`
   width: min(100%, 820px);
-  min-height: 52px;
+  min-height: 56px;
   margin: 0 auto;
-  padding: 5px 6px 5px 17px;
+  padding: 6px 7px 6px 18px;
   display: flex;
   align-items: center;
   gap: 10px;
   border: 1px solid
     ${({ $isDark }) => ($isDark ? "#3A443F" : "#D6E1DC")};
-  border-radius: 999px;
-  background: ${({ $isDark }) => ($isDark ? "#242B27" : "#F8FAF9")};
-  box-shadow: 0 8px 24px rgba(28, 54, 42, 0.06);
+  border-radius: 19px;
+  background: ${({ $isDark }) => ($isDark ? "#252E29" : "#F7FAF7")};
+  box-shadow: 0 9px 26px rgba(54, 91, 72, 0.07);
   transition:
     border-color 160ms ease,
     box-shadow 160ms ease;
 
   &:focus-within {
-    border-color: ${palette.green};
-    box-shadow: 0 0 0 3px rgba(8, 184, 106, 0.13);
+    border-color: var(--porty-primary);
+    background: var(--porty-surface);
+    box-shadow: 0 0 0 4px rgba(120, 214, 173, 0.16);
   }
 `;
 
@@ -371,7 +470,7 @@ export const SendButton = styled.button`
   display: grid;
   place-items: center;
   border: 0;
-  border-radius: 50%;
+  border-radius: 14px;
   background: ${({ disabled }) => (disabled ? "#B9C5BF" : palette.green)};
   color: ${({ disabled }) => (disabled ? "#66716C" : "#10251A")};
   cursor: ${({ disabled }) => (disabled ? "default" : "pointer")};
@@ -480,7 +579,7 @@ export const SplashOverlay = styled.div`
   align-items: center;
   justify-content: center;
   background:
-    radial-gradient(circle at 50% 38%, #ffffff 0, #eef8f3 48%, #e4f2eb 100%);
+    radial-gradient(circle at 50% 38%, #fffefa 0, #eff9f3 48%, #e7f3ec 100%);
   z-index: 500;
   animation: splashFade 500ms ease forwards;
   animation-delay: 1.15s;
@@ -513,22 +612,26 @@ export const SplashBox = styled.div`
 `;
 
 export const SplashImage = styled.img`
-  width: 76px;
-  height: 76px;
+  width: 88px;
+  height: 88px;
   margin-bottom: 6px;
+  padding: 7px;
+  border: 3px solid #ffffff;
+  border-radius: 28px 28px 28px 10px;
+  background: var(--porty-accent-soft);
+  box-shadow: 0 15px 32px rgba(71, 112, 89, 0.14);
   object-fit: contain;
-  filter: drop-shadow(0 12px 20px rgba(8, 112, 67, 0.2));
 `;
 
 export const SplashLogo = styled.div`
   color: ${palette.text};
-  font-size: 24px;
-  font-weight: 800;
+  font-size: 25px;
+  font-weight: 850;
   letter-spacing: -0.03em;
 `;
 
 export const SplashSubtitle = styled.div`
   color: ${palette.subtext};
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 12px;
+  font-weight: 600;
 `;

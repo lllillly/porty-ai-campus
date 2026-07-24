@@ -8,6 +8,7 @@ import DietCard from "../components/DietCard";
 import DietSettingsModal from "../components/DietSettingsModal";
 import CalendarCard from "../components/CalendarCard";
 import ShuttleCard from "../components/ShuttleCard";
+import StudentNewsCard from "../components/StudentNewsCard";
 import CampusMap from "../components/CampusMap";
 import CourseRegist from "../components/CourseRegist";
 import FAQPreview from "../components/FAQPreview";
@@ -41,24 +42,36 @@ const generateSessionId = () => {
 };
 
 const getOrCreateSessionId = () => {
-  let sessionId = localStorage.getItem("chat_session_id");
+  let sessionId = sessionStorage.getItem("chat_session_id");
   if (!sessionId) {
     sessionId = generateSessionId();
-    localStorage.setItem("chat_session_id", sessionId);
+    sessionStorage.setItem("chat_session_id", sessionId);
   }
   return sessionId;
+};
+
+const CHAT_MEMORY_KEY = "porty_session_chats_v2";
+const INITIAL_CHATS = [
+  {
+    sender: "porty",
+    text: "안녕하세요! 오늘의 공주대 생활을 함께 찾아볼 포티예요 🌱\n궁금한 내용을 편하게 물어보세요.",
+    showQuickActions: true,
+  },
+];
+
+const getInitialChats = () => {
+  try {
+    const saved = JSON.parse(sessionStorage.getItem(CHAT_MEMORY_KEY));
+    return Array.isArray(saved) && saved.length > 0 ? saved : INITIAL_CHATS;
+  } catch {
+    return INITIAL_CHATS;
+  }
 };
 
 const ChatPage = () => {
   const [message, setMessage] = useState("");
   const [sessionId, setSessionId] = useState("");
-  const [chats, setChats] = useState([
-    {
-      sender: "porty",
-      text: "안녕하세요 😊 공주대학교의 모든 것을 알려주는 챗봇 포티입니다.\n무엇을 도와드릴까요?",
-      showQuickActions: true,
-    },
-  ]);
+  const [chats, setChats] = useState(getInitialChats);
 
   const [loading, setLoading] = useState(false);
   const [showFAQ, setShowFAQ] = useState(false);
@@ -75,6 +88,7 @@ const ChatPage = () => {
   const [toastMessage, setToastMessage] = useState("");
 
   const chatBodyRef = useRef(null);
+  const chatsRef = useRef(chats);
 
   const showToast = (msg) => {
     setToastMessage(msg);
@@ -84,6 +98,23 @@ const ChatPage = () => {
   useEffect(() => {
     setSessionId(getOrCreateSessionId());
   }, []);
+
+  useEffect(() => {
+    chatsRef.current = chats;
+    const serializableChats = chats
+      .filter((chat) => chat.text)
+      .slice(-24)
+      .map(({ sender, text, showQuickActions, presentation }) => ({
+        sender,
+        text,
+        showQuickActions: Boolean(showQuickActions),
+        presentation: presentation || null,
+      }));
+    sessionStorage.setItem(
+      CHAT_MEMORY_KEY,
+      JSON.stringify(serializableChats),
+    );
+  }, [chats]);
 
   useEffect(() => {
     const saved = localStorage.getItem("diet_settings");
@@ -110,7 +141,7 @@ const ChatPage = () => {
   }, []);
 
   useEffect(() => {
-    document.body.style.backgroundColor = isDarkMode ? "#111513" : "#EEF5F2";
+    document.body.style.backgroundColor = isDarkMode ? "#141A17" : "#F5F8F3";
     document.documentElement.dataset.theme = isDarkMode ? "dark" : "light";
     return () => {
       document.body.style.backgroundColor = "";
@@ -176,13 +207,13 @@ const ChatPage = () => {
     }
 
     try {
-      const history = chats
+      const history = chatsRef.current
         .filter((chat) => chat.text && !chat.showQuickActions)
         .map((chat) => ({
           role: chat.sender === "user" ? "user" : "assistant",
           content: chat.text,
         }))
-        .slice(-6);
+        .slice(-12);
       const response = await sendChatMessage({
         sessionId,
         message: text,
@@ -194,13 +225,7 @@ const ChatPage = () => {
       appendChat({
         sender: "porty",
         text: responseText,
-        component:
-          response?.presentation?.type === "shuttle" ? (
-            <ShuttleCard
-              data={response.presentation}
-              onBackToMain={handleBackToMain}
-            />
-          ) : null,
+        presentation: response?.presentation || null,
       });
     } catch {
       appendChat({
@@ -218,6 +243,12 @@ const ChatPage = () => {
       text: "다른 도움이 필요하시면 아래 버튼을 선택해 주세요.",
       showQuickActions: true,
     });
+
+  const resetConversation = () => {
+    sessionStorage.removeItem(CHAT_MEMORY_KEY);
+    sessionStorage.removeItem("chat_session_id");
+    window.location.reload();
+  };
 
   const handleDietModalSave = (s) => {
     setDietSettings(s);
@@ -238,14 +269,14 @@ const ChatPage = () => {
       <Header $isDark={isDarkMode}>
         <HeaderContent>
           <BrandButton
-            onClick={() => window.location.reload()}
-            title="PORTY 대화 새로 시작하기"
-            aria-label="PORTY 대화 새로 시작하기"
+            onClick={resetConversation}
+            title="포티와 새 대화 시작하기"
+            aria-label="포티와 새 대화 시작하기"
           >
-            <Logo src="/assets/porty-mark.svg" alt="" />
+            <Logo src="/assets/knung.png" alt="" $isDark={isDarkMode} />
             <BrandCopy>
-              <BrandName $isDark={isDarkMode}>PORTY</BrandName>
-              <BrandStatus $isDark={isDarkMode}>공주대 캠퍼스 도우미</BrandStatus>
+              <BrandName $isDark={isDarkMode}>포티</BrandName>
+              <BrandStatus $isDark={isDarkMode}>오늘의 캠퍼스 메이트</BrandStatus>
             </BrandCopy>
           </BrandButton>
 
@@ -262,8 +293,8 @@ const ChatPage = () => {
             <MenuButton
               $isDark={isDarkMode}
               onClick={() => setShowDarkModal(true)}
-              title="PORTY 설정"
-              aria-label="PORTY 설정 열기"
+              title="포티 설정"
+              aria-label="포티 설정 열기"
             >
               <Menu size={20} />
             </MenuButton>
@@ -288,7 +319,24 @@ const ChatPage = () => {
       <ChatBody ref={chatBodyRef} $isDark={isDarkMode}>
         {chats.map((c, idx) => (
           <div key={idx}>
-            {c.component ? (
+            {c.presentation?.type === "shuttle" ? (
+              <div style={{ display: "flex" }}>
+                <ShuttleCard
+                  data={c.presentation}
+                  onBackToMain={handleBackToMain}
+                />
+              </div>
+            ) : c.presentation?.type === "student-news" ? (
+              <div style={{ display: "flex" }}>
+                <StudentNewsCard
+                  data={c.presentation}
+                  onRead={(index) =>
+                    sendMessage(`${index + 1}번 학생소식 내용 보여줘`)
+                  }
+                  onBackToMain={handleBackToMain}
+                />
+              </div>
+            ) : c.component ? (
               <div style={{ display: "flex" }}>{c.component}</div>
             ) : (
               <>

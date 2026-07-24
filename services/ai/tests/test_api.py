@@ -5,6 +5,7 @@ from fastapi.testclient import TestClient
 import app.main as main
 from app.main import app
 from app.meal_scraper import Meal, MealResult
+from app.student_news import StudentNewsItem
 
 
 def test_health_reports_loaded_documents():
@@ -51,6 +52,101 @@ def test_identity_small_talk_can_use_multiple_natural_responses(monkeypatch):
     assert first["response"] != second["response"]
     assert "포티" in first["response"]
     assert "포티" in second["response"]
+
+
+def test_latest_student_news_returns_live_card_data(monkeypatch):
+    items = tuple(
+        StudentNewsItem(
+            title=f"최신 학생소식 {index}",
+            date="2026.07.24",
+            url=(
+                "https://www.kongju.ac.kr/bbs/KNU/2132/"
+                f"{100 + index}/artclView.do?layout=unknown"
+            ),
+            preview=f"{index}번 글 미리보기",
+        )
+        for index in range(1, 4)
+    )
+    monkeypatch.setattr(
+        main,
+        "fetch_latest_student_news",
+        lambda **_: items,
+    )
+
+    with TestClient(app) as client:
+        payload = client.post(
+            "/api/ai/query",
+            json={
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": "공주대학교 학생소식 최근 글 3개 보여줘",
+                    }
+                ]
+            },
+        ).json()
+
+    assert payload["mode"] == "structured"
+    assert payload["presentation"]["type"] == "student-news"
+    assert payload["presentation"]["view"] == "list"
+    assert len(payload["presentation"]["items"]) == 3
+    assert payload["sources"][0]["title"] == "최신 학생소식 1"
+    assert "학생부종합전형" not in payload["response"]
+
+
+def test_student_news_follow_up_uses_previous_results(monkeypatch):
+    captured = {}
+
+    def fake_details(urls):
+        captured["urls"] = urls
+        return (
+            StudentNewsItem(
+                title="두 번째 학생소식",
+                date="2026.07.24",
+                url=urls[0],
+                preview="두 번째 글의 요약입니다.",
+                author="학생복지과",
+                content="두 번째 글의 전체 내용입니다.",
+            ),
+        )
+
+    monkeypatch.setattr(main, "fetch_student_news_details", fake_details)
+
+    first_url = (
+        "https://www.kongju.ac.kr/bbs/KNU/2132/101/"
+        "artclView.do?layout=unknown"
+    )
+    second_url = (
+        "https://www.kongju.ac.kr/bbs/KNU/2132/102/"
+        "artclView.do?layout=unknown"
+    )
+    third_url = (
+        "https://www.kongju.ac.kr/bbs/KNU/2132/103/"
+        "artclView.do?layout=unknown"
+    )
+    previous_answer = (
+        f"1. [첫 번째 글]({first_url})\n"
+        f"2. [두 번째 글]({second_url})\n"
+        f"3. [세 번째 글]({third_url})"
+    )
+
+    with TestClient(app) as client:
+        payload = client.post(
+            "/api/ai/query",
+            json={
+                "messages": [
+                    {"role": "user", "content": "최근 학생소식 3개 보여줘"},
+                    {"role": "assistant", "content": previous_answer},
+                    {"role": "user", "content": "두 번째 내용 보여줘"},
+                ]
+            },
+        ).json()
+
+    assert captured["urls"] == [second_url]
+    assert payload["mode"] == "structured"
+    assert payload["presentation"]["view"] == "detail"
+    assert payload["presentation"]["items"][0]["author"] == "학생복지과"
+    assert "전체 내용" in payload["response"]
 
 
 def test_query_returns_verified_campus_address():

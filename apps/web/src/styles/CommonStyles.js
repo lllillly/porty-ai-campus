@@ -5,7 +5,7 @@ export const CommonCard = styled.article`
   margin: 2px 0 2px 48px;
   padding: 18px;
   border: 1px solid var(--porty-border);
-  border-radius: 18px;
+  border-radius: 22px 22px 22px 8px;
   background: var(--porty-surface);
   box-shadow: var(--porty-shadow);
   color: var(--porty-text);
@@ -21,9 +21,9 @@ export const PrimaryButton = styled.button`
   min-height: 44px;
   padding: 10px 16px;
   border: 0;
-  border-radius: 12px;
+  border-radius: 13px;
   background: var(--porty-primary);
-  color: #10251a;
+  color: #173c2d;
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;

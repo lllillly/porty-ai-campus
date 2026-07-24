@@ -15,6 +15,14 @@ from .generator import extractive_answer, generate_grounded_answer
 from .meal_scraper import MealResult, MealScrapeError, fetch_meals
 from .models import QueryRequest, QueryResponse, Source
 from .retrieval import LexicalRetriever, read_json, tokenize
+from .student_news import (
+    STUDENT_NEWS_URL,
+    StudentNewsError,
+    StudentNewsItem,
+    fetch_latest_student_news,
+    fetch_student_news_details,
+    fetched_at as student_news_fetched_at,
+)
 
 
 settings: Settings = load_settings()
@@ -83,6 +91,10 @@ SHUTTLE_ROUTE_SUMMARY = (
     {"name": "대전 → 예산", "departures": ("07:40",), "note": "월요일"},
 )
 MEAL_SOURCE_URL = "https://www.kongju.ac.kr/KNU/16863/subview.do"
+STUDENT_NEWS_URL_PATTERN = re.compile(
+    r"https://www\.kongju\.ac\.kr/bbs/KNU/2132/\d+/artclView\.do"
+    r"(?:\?layout=unknown)?"
+)
 
 
 @asynccontextmanager
@@ -175,6 +187,178 @@ def university_intro_response(message: str) -> QueryResponse | None:
         ],
         mode="structured",
     )
+
+
+def _student_news_sources(
+    items: tuple[StudentNewsItem, ...],
+) -> list[Source]:
+    return [
+        Source(
+            category="학생소식",
+            title=item.title,
+            snippet=item.preview,
+            score=1.0,
+            source_url=item.url,
+            reference_date=item.date,
+        )
+        for item in items
+    ]
+
+
+def _student_news_urls_from_history(body: QueryRequest) -> list[str]:
+    for history_item in reversed(body.messages[:-1]):
+        if history_item.role != "assistant":
+            continue
+        urls = STUDENT_NEWS_URL_PATTERN.findall(history_item.content)
+        if urls:
+            return list(dict.fromkeys(urls))[:3]
+    return []
+
+
+def _selected_news_indices(message: str, item_count: int) -> list[int]:
+    normalized = re.sub(r"\s+", "", message)
+    ordinal_terms = (
+        (0, ("첫번째", "첫째", "1번째", "1번")),
+        (1, ("두번째", "둘째", "2번째", "2번")),
+        (2, ("세번째", "셋째", "3번째", "3번")),
+    )
+    for index, terms in ordinal_terms:
+        if index < item_count and any(term in normalized for term in terms):
+            return [index]
+    return list(range(item_count))
+
+
+def student_news_response(
+    body: QueryRequest,
+    message: str,
+) -> QueryResponse | None:
+    normalized = re.sub(r"\s+", "", message)
+    explicit_news_request = any(
+        keyword in normalized
+        for keyword in ("학생소식", "학생공지", "학생뉴스")
+    )
+    detail_request = any(
+        keyword in normalized
+        for keyword in (
+            "내용",
+            "자세히",
+            "요약",
+            "첫번째",
+            "두번째",
+            "세번째",
+            "1번",
+            "2번",
+            "3번",
+            "그글",
+        )
+    )
+    history_urls = _student_news_urls_from_history(body)
+    has_news_context = bool(history_urls) or any(
+        item.role == "user"
+        and any(
+            keyword in re.sub(r"\s+", "", item.content)
+            for keyword in ("학생소식", "학생공지", "학생뉴스")
+        )
+        for item in body.messages[:-1]
+    )
+    if not explicit_news_request and not (has_news_context and detail_request):
+        return None
+
+    try:
+        if detail_request:
+            if not history_urls:
+                latest = fetch_latest_student_news(limit=3)
+                history_urls = [item.url for item in latest]
+            selected_indices = _selected_news_indices(
+                message,
+                len(history_urls),
+            )
+            urls = [history_urls[index] for index in selected_indices]
+            items = fetch_student_news_details(urls)
+            lines = ["요청하신 학생소식 내용을 정리했습니다."]
+            for index, item in enumerate(items, start=1):
+                lines.extend(
+                    [
+                        "",
+                        f"### {index}. {item.title}",
+                        f"{item.date}"
+                        + (f" · {item.author}" if item.author else ""),
+                        "",
+                        item.content or item.preview,
+                        "",
+                        f"[공식 게시글에서 보기]({item.url})",
+                    ]
+                )
+            return QueryResponse(
+                response="\n".join(lines),
+                sources=_student_news_sources(items),
+                presentation={
+                    "type": "student-news",
+                    "view": "detail",
+                    "title": "학생소식 자세히 보기",
+                    "items": [item.as_dict() for item in items],
+                    "fetchedAt": student_news_fetched_at(),
+                    "sourceUrl": STUDENT_NEWS_URL,
+                },
+                mode="structured",
+            )
+
+        items = fetch_latest_student_news(limit=3)
+        lines = ["국립공주대학교 공식 학생소식의 최신 글 3개입니다."]
+        for index, item in enumerate(items, start=1):
+            lines.extend(
+                [
+                    "",
+                    f"{index}. [{item.title}]({item.url})",
+                    f"   - {item.date} · {item.preview}",
+                ]
+            )
+        lines.extend(
+            [
+                "",
+                "궁금한 글의 번호를 말하면 내용을 이어서 보여드리겠습니다.",
+                f"[학생소식 전체 보기]({STUDENT_NEWS_URL})",
+            ]
+        )
+        return QueryResponse(
+            response="\n".join(lines),
+            sources=_student_news_sources(items),
+            presentation={
+                "type": "student-news",
+                "view": "list",
+                "title": "새로 올라온 학생소식",
+                "items": [item.as_dict() for item in items],
+                "fetchedAt": student_news_fetched_at(),
+                "sourceUrl": STUDENT_NEWS_URL,
+            },
+            mode="structured",
+        )
+    except StudentNewsError:
+        response = (
+            "공식 학생소식 페이지에서 최신 글을 불러오지 못했습니다. "
+            "잠시 후 다시 시도하거나 아래 게시판에서 확인해 주세요.\n\n"
+            f"[학생소식 전체 보기]({STUDENT_NEWS_URL})"
+        )
+        return QueryResponse(
+            response=response,
+            sources=[
+                Source(
+                    category="학생소식",
+                    title="국립공주대학교 학생소식",
+                    snippet="공식 학생소식 게시판",
+                    score=1.0,
+                    source_url=STUDENT_NEWS_URL,
+                )
+            ],
+            presentation={
+                "type": "student-news",
+                "view": "error",
+                "title": "학생소식",
+                "items": [],
+                "sourceUrl": STUDENT_NEWS_URL,
+            },
+            mode="fallback",
+        )
 
 
 def academic_special_response(message: str) -> QueryResponse | None:
@@ -906,7 +1090,21 @@ def retrieval_message(body: QueryRequest, message: str) -> str:
         for token in tokenize(message)
         if not token.startswith("~")
     ]
-    follow_up_markers = ("그거", "그건", "그럼", "그러면", "아까", "해당")
+    follow_up_markers = (
+        "그거",
+        "그건",
+        "그 글",
+        "그 내용",
+        "그럼",
+        "그러면",
+        "아까",
+        "해당",
+        "내용 보여",
+        "자세히",
+        "첫 번째",
+        "두 번째",
+        "세 번째",
+    )
     is_follow_up = len(message_words) <= 1 or any(
         marker in message for marker in follow_up_markers
     )
@@ -976,6 +1174,9 @@ def query(body: QueryRequest, request: Request) -> QueryResponse:
 
     if response := small_talk_response(message):
         return QueryResponse(response=response, mode="small-talk")
+
+    if response := student_news_response(body, message):
+        return response
 
     if response := university_intro_response(message):
         return response

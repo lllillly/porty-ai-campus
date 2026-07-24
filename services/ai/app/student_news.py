@@ -1,0 +1,210 @@
+from __future__ import annotations
+
+from concurrent.futures import ThreadPoolExecutor
+from dataclasses import dataclass
+from datetime import datetime
+import re
+from typing import Callable, Sequence
+from urllib.parse import urljoin
+from zoneinfo import ZoneInfo
+
+from bs4 import BeautifulSoup
+import httpx
+
+from .meal_scraper import KONGJU_SSL_CONTEXT
+
+
+KOREA_TIMEZONE = ZoneInfo("Asia/Seoul")
+KONGJU_HOME_URL = "https://www.kongju.ac.kr/KNU/index.do"
+STUDENT_NEWS_URL = (
+    "https://www.kongju.ac.kr/bbs/KNU/2132/artclList.do?layout=unknown"
+)
+STUDENT_NEWS_LINK_PATTERN = re.compile(
+    r"^/bbs/KNU/2132/\d+/artclView\.do"
+)
+
+
+@dataclass(frozen=True)
+class StudentNewsItem:
+    title: str
+    date: str
+    url: str
+    preview: str
+    author: str | None = None
+    content: str | None = None
+    images: tuple[str, ...] = ()
+    attachments: tuple[dict[str, str], ...] = ()
+
+    def as_dict(self) -> dict[str, object]:
+        return {
+            "title": self.title,
+            "date": self.date,
+            "url": self.url,
+            "preview": self.preview,
+            "author": self.author,
+            "content": self.content,
+            "images": list(self.images),
+            "attachments": list(self.attachments),
+        }
+
+
+class StudentNewsError(RuntimeError):
+    pass
+
+
+def _clean(value: str) -> str:
+    return re.sub(r"\s+", " ", value).strip()
+
+
+def parse_student_news_list(
+    html: str,
+    *,
+    limit: int = 3,
+) -> list[StudentNewsItem]:
+    soup = BeautifulSoup(html, "html.parser")
+    items: list[StudentNewsItem] = []
+    seen_urls: set[str] = set()
+
+    for anchor in soup.select('a.subject[href*="/bbs/KNU/2132/"]'):
+        href = str(anchor.get("href", "")).strip()
+        if not STUDENT_NEWS_LINK_PATTERN.match(href) or href in seen_urls:
+            continue
+
+        title_node = anchor.select_one(".sj")
+        date_node = anchor.select_one(".date")
+        preview_node = anchor.select_one(".cn")
+        title = _clean(title_node.get_text(" ")) if title_node else ""
+        date = _clean(date_node.get_text(" ")) if date_node else ""
+        preview = _clean(preview_node.get_text(" ")) if preview_node else ""
+        if not title or not date:
+            continue
+
+        url = urljoin(KONGJU_HOME_URL, href)
+        items.append(
+            StudentNewsItem(
+                title=title,
+                date=date,
+                url=url,
+                preview=preview or "이미지 또는 첨부파일로 제공되는 공지입니다.",
+            )
+        )
+        seen_urls.add(href)
+        if len(items) >= limit:
+            break
+
+    if not items:
+        raise StudentNewsError("학생소식 목록을 찾지 못했습니다.")
+    return items
+
+
+def parse_student_news_detail(html: str, *, url: str) -> StudentNewsItem:
+    soup = BeautifulSoup(html, "html.parser")
+    title_node = soup.select_one(".view-title")
+    if title_node is None:
+        raise StudentNewsError("학생소식 본문을 찾지 못했습니다.")
+
+    title = _clean(title_node.get_text(" "))
+    author_node = soup.select_one(".view-detail .writer dd")
+    date_node = soup.select_one(".view-detail .write dd")
+    content_node = soup.select_one(".view-con")
+    content = _clean(content_node.get_text(" ")) if content_node else ""
+    images = tuple(
+        urljoin(url, str(image.get("src", "")).strip())
+        for image in (content_node.select("img[src]") if content_node else [])
+        if str(image.get("src", "")).strip()
+    )[:3]
+
+    attachments: list[dict[str, str]] = []
+    for anchor in soup.select('.view-file a[title*="다운로드"]'):
+        href = str(anchor.get("href", "")).strip()
+        name = _clean(anchor.get_text(" "))
+        if href and name:
+            attachments.append(
+                {
+                    "name": name,
+                    "url": urljoin(url, href),
+                }
+            )
+
+    if not content:
+        content = (
+            "본문이 이미지로 제공되는 공지입니다. 아래 공지 이미지를 확인하거나 "
+            "공식 원문을 열어 자세한 내용을 확인해 주세요."
+            if images
+            else "본문은 공식 게시글과 첨부파일에서 확인해 주세요."
+        )
+
+    return StudentNewsItem(
+        title=title,
+        date=_clean(date_node.get_text(" ")) if date_node else "",
+        url=url,
+        preview=content[:180],
+        author=_clean(author_node.get_text(" ")) if author_node else None,
+        content=content[:1_200],
+        images=images,
+        attachments=tuple(attachments[:5]),
+    )
+
+
+def _download(url: str) -> str:
+    try:
+        response = httpx.get(
+            url,
+            headers={
+                "User-Agent": (
+                    "Mozilla/5.0 (compatible; PORTY/1.0; "
+                    "+https://porty-ai-campus.vercel.app)"
+                ),
+                "Accept-Language": "ko-KR,ko;q=0.9",
+            },
+            follow_redirects=True,
+            timeout=12.0,
+            verify=KONGJU_SSL_CONTEXT,
+        )
+        response.raise_for_status()
+        return response.text
+    except httpx.HTTPError as error:
+        raise StudentNewsError(
+            "공식 학생소식 페이지에 연결하지 못했습니다."
+        ) from error
+
+
+def fetch_latest_student_news(
+    *,
+    limit: int = 3,
+    downloader: Callable[[str], str] = _download,
+) -> tuple[StudentNewsItem, ...]:
+    return tuple(
+        parse_student_news_list(
+            downloader(KONGJU_HOME_URL),
+            limit=limit,
+        )
+    )
+
+
+def fetch_student_news_details(
+    urls: Sequence[str],
+    *,
+    downloader: Callable[[str], str] = _download,
+) -> tuple[StudentNewsItem, ...]:
+    safe_urls = [
+        url
+        for url in urls[:3]
+        if re.match(
+            r"^https://www\.kongju\.ac\.kr/bbs/KNU/2132/\d+/"
+            r"artclView\.do",
+            url,
+        )
+    ]
+    if not safe_urls:
+        raise StudentNewsError("확인할 학생소식 링크가 없습니다.")
+
+    def fetch(url: str) -> StudentNewsItem:
+        return parse_student_news_detail(downloader(url), url=url)
+
+    with ThreadPoolExecutor(max_workers=len(safe_urls)) as executor:
+        return tuple(executor.map(fetch, safe_urls))
+
+
+def fetched_at() -> str:
+    return datetime.now(KOREA_TIMEZONE).isoformat(timespec="seconds")

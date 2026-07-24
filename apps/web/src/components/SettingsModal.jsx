@@ -71,7 +71,7 @@ const SettingsModal = ({ isDarkMode, onToggleDarkMode, onClose }) => {
   return (
     <ModalBackdrop onClick={onClose}>
       <ModalContainer onClick={(event) => event.stopPropagation()}>
-        <ModalTitle>PORTY 설정</ModalTitle>
+        <ModalTitle>포티 설정</ModalTitle>
 
         <Label>화면</Label>
         <ToggleRow>

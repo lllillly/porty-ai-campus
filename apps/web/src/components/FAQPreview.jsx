@@ -20,11 +20,16 @@ const FAQ_LIST = [
     },
     {
         id: 4,
+        question: "최근 학생소식 3개 보여줘",
+        keywords: ["학생소식", "공지", "학생공지", "최신글", "새소식"],
+    },
+    {
+        id: 5,
         question: "공주대학교에 대해 알려주세요",
         keywords: ["공주대", "공주대학교", "공주대학교설명", "설명", "공주대설명"],
     },
     {
-        id: 5,
+        id: 6,
         question: "통학버스 시간표 알려줘",
         keywords: ["통학", "버스", "시간표", "셔틀", "교통"],
     },
@@ -97,9 +102,9 @@ const FAQContainer = styled.div`
     margin: 0 auto;
     padding: 14px;
     border: 1px solid var(--porty-border);
-    border-radius: 18px;
+    border-radius: 22px 22px 22px 9px;
     background: color-mix(in srgb, var(--porty-surface) 96%, transparent);
-    box-shadow: 0 18px 48px rgba(19, 43, 32, 0.16);
+    box-shadow: 0 20px 52px rgba(48, 81, 64, 0.16);
     backdrop-filter: blur(16px);
     animation: slideUp 180ms ease-out;
     z-index: 200;
@@ -195,7 +200,7 @@ const FAQItem = styled.button`
     gap: 10px;
     padding: 9px 11px;
     border: 1px solid transparent;
-    border-radius: 13px;
+    border-radius: 15px 15px 15px 6px;
     background: var(--porty-surface-soft);
     cursor: pointer;
     transition: all 160ms ease;
