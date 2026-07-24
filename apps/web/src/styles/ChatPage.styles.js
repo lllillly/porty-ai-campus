@@ -638,6 +638,10 @@ export const StyledInput = styled.input`
   &::placeholder {
     color: ${({ $isDark }) => ($isDark ? "#87918C" : "#89938E")};
   }
+
+  &:focus-visible {
+    outline: 0;
+  }
 `;
 
 export const SendButton = styled.button`

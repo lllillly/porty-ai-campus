@@ -9,6 +9,7 @@ import DietSettingsModal from "../components/DietSettingsModal";
 import CalendarCard from "../components/CalendarCard";
 import CampusMap from "../components/CampusMap";
 import CourseRegist from "../components/CourseRegist";
+import FAQPreview from "../components/FAQPreview";
 
 import Toast from "../components/Toast";
 import SettingsModal from "../components/SettingsModal";
@@ -47,6 +48,7 @@ const ChatPage = () => {
   const [chats, setChats] = useState(getInitialChats);
 
   const [loading, setLoading] = useState(false);
+  const [showFAQ, setShowFAQ] = useState(false);
 
   const [dietSettings, setDietSettings] = useState(null);
   const [showDietModal, setShowDietModal] = useState(false);
@@ -132,6 +134,7 @@ const ChatPage = () => {
 
     setMessage("");
     setLoading(true);
+    setShowFAQ(false);
 
     appendChat({ sender: "user", text });
 
@@ -275,6 +278,17 @@ const ChatPage = () => {
 
       {toastMessage && <Toast message={toastMessage} />}
 
+      {showFAQ && (
+        <FAQPreview
+          searchTerm={message}
+          onSelect={(question) => {
+            setShowFAQ(false);
+            sendMessage(question);
+          }}
+          onClose={() => setShowFAQ(false)}
+        />
+      )}
+
       <ChatBody
         ref={chatBodyRef}
         $isDark={isDarkMode}
@@ -311,8 +325,17 @@ const ChatPage = () => {
             $isDark={isDarkMode}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+            onFocus={() => setShowFAQ(true)}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") {
+                setShowFAQ(false);
+                return;
+              }
+              if (e.key === "Enter") sendMessage();
+            }}
             placeholder="궁금한 학교생활을 물어보세요"
+            aria-expanded={showFAQ}
+            aria-controls="porty-question-preview"
           />
 
           <SendButton
