@@ -162,7 +162,7 @@ export const ChatBody = styled.section`
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 32px 24px 38px;
+  padding: clamp(32px, 7vh, 72px) 24px 38px;
   display: flex;
   flex-direction: column;
   gap: 18px;
@@ -214,9 +214,129 @@ export const ChatBody = styled.section`
   }
 
   @media (max-width: 768px) {
-    padding: 22px 14px 28px;
+    padding: 28px 14px 26px;
     gap: 16px;
   }
+`;
+
+export const WelcomeCard = styled.section`
+  width: min(100%, 760px);
+  margin: 0 auto;
+  padding: 12px 0 28px;
+`;
+
+export const WelcomeCopy = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(24px, 5vw, 52px);
+  margin-bottom: 38px;
+
+  @media (max-width: 620px) {
+    flex-direction: column;
+    gap: 20px;
+    margin-bottom: 30px;
+    text-align: center;
+  }
+`;
+
+export const WelcomeCharacter = styled.div`
+  width: 132px;
+  height: 132px;
+  position: relative;
+  flex: 0 0 132px;
+  display: grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--porty-accent) 68%, white);
+  border-radius: 44px 44px 44px 18px;
+  background:
+    radial-gradient(circle at 30% 20%, #fffefa 0 7%, transparent 8%),
+    var(--porty-accent-soft);
+  box-shadow:
+    0 0 0 10px color-mix(in srgb, var(--porty-accent-soft) 52%, transparent),
+    0 22px 50px rgba(101, 91, 46, 0.14);
+  transform: rotate(-2deg);
+
+  img {
+    width: 105px;
+    height: 105px;
+    object-fit: contain;
+    transform: rotate(2deg);
+  }
+
+  > span {
+    width: 36px;
+    height: 36px;
+    position: absolute;
+    top: -12px;
+    right: -10px;
+    display: grid;
+    place-items: center;
+    border: 3px solid var(--porty-canvas);
+    border-radius: 13px;
+    background: var(--porty-primary);
+    color: #173c2d;
+    transform: rotate(8deg);
+    z-index: 1;
+  }
+
+  @media (max-width: 620px) {
+    width: 108px;
+    height: 108px;
+    flex-basis: 108px;
+    border-radius: 36px 36px 36px 14px;
+
+    img {
+      width: 86px;
+      height: 86px;
+    }
+  }
+`;
+
+export const WelcomeEyebrow = styled.p`
+  margin: 0 0 9px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--porty-primary-hover);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+
+  span {
+    width: 18px;
+    height: 2px;
+    border-radius: 999px;
+    background: var(--porty-primary);
+  }
+
+  @media (max-width: 620px) {
+    justify-content: center;
+  }
+`;
+
+export const WelcomeTitle = styled.h1`
+  margin: 0;
+  color: var(--porty-text);
+  font-size: clamp(29px, 3.4vw, 40px);
+  font-weight: 850;
+  letter-spacing: -0.055em;
+  line-height: 1.18;
+`;
+
+export const WelcomeDescription = styled.p`
+  margin: 13px 0 0;
+  color: var(--porty-subtext);
+  font-size: 14px;
+  font-weight: 520;
+  line-height: 1.55;
+`;
+
+export const WelcomePrompt = styled.p`
+  margin: 0 0 11px;
+  color: var(--porty-subtext);
+  font-size: 12px;
+  font-weight: 700;
 `;
 
 export const MessageWrapper = styled.div`
@@ -340,11 +460,15 @@ export const MessageBubble = styled.div`
 `;
 
 export const QuickActionsWrapper = styled.div`
-  width: min(calc(100% - 53px), 620px);
-  margin: 12px 0 0 53px;
+  width: ${({ $featured }) =>
+    $featured ? "100%" : "min(calc(100% - 53px), 680px)"};
+  margin: ${({ $featured }) => ($featured ? "0" : "12px 0 0 53px")};
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
+  grid-template-columns: ${({ $featured }) =>
+    $featured
+      ? "repeat(3, minmax(0, 1fr))"
+      : "repeat(3, minmax(0, 1fr))"};
+  gap: ${({ $featured }) => ($featured ? "11px" : "8px")};
 
   @media (max-width: 620px) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -353,17 +477,21 @@ export const QuickActionsWrapper = styled.div`
 
 export const QuickActionButton = styled.button`
   min-width: 0;
-  min-height: 66px;
+  min-height: ${({ $featured }) => ($featured ? "86px" : "66px")};
+  position: relative;
   display: flex;
   align-items: center;
   gap: 9px;
-  padding: 10px;
+  padding: ${({ $featured }) => ($featured ? "14px 13px" : "10px")};
   border: 1px solid
     ${({ $isDark }) => ($isDark ? "#34413A" : "#E0E9E3")};
-  border-radius: 16px 16px 16px 6px;
+  border-radius: ${({ $featured }) =>
+    $featured ? "19px 19px 19px 8px" : "16px 16px 16px 6px"};
   background: ${({ $isDark }) => ($isDark ? "#1D2521" : "#FFFEFA")};
   color: ${({ $isDark }) => ($isDark ? "#E7ECE9" : "#315245")};
   text-align: left;
+  box-shadow: ${({ $featured, $isDark }) =>
+    $featured && !$isDark ? "0 10px 28px rgba(54, 91, 72, 0.07)" : "none"};
   cursor: pointer;
   transition:
     border-color 160ms ease,
@@ -371,14 +499,30 @@ export const QuickActionButton = styled.button`
     transform 160ms ease;
 
   > span {
-    width: 32px;
-    height: 32px;
-    flex: 0 0 32px;
+    width: ${({ $featured }) => ($featured ? "38px" : "32px")};
+    height: ${({ $featured }) => ($featured ? "38px" : "32px")};
+    flex: 0 0 ${({ $featured }) => ($featured ? "38px" : "32px")};
     display: grid;
     place-items: center;
     border-radius: 11px;
-    background: var(--porty-primary-soft);
-    color: var(--porty-primary-hover);
+    background: ${({ $tone }) =>
+      ({
+        mint: "#E3F8EF",
+        yellow: "#FFF3CF",
+        blue: "#E7F2FF",
+        purple: "#F1EAFF",
+        coral: "#FFEBE5",
+        green: "#EAF6DF",
+      })[$tone] || "var(--porty-primary-soft)"};
+    color: ${({ $tone }) =>
+      ({
+        mint: "#24815F",
+        yellow: "#9B6811",
+        blue: "#397BB4",
+        purple: "#7854AD",
+        coral: "#B76049",
+        green: "#5D862D",
+      })[$tone] || "var(--porty-primary-hover)"};
   }
 
   > div {
@@ -389,7 +533,7 @@ export const QuickActionButton = styled.button`
 
   strong {
     color: var(--porty-text);
-    font-size: 12px;
+    font-size: ${({ $featured }) => ($featured ? "13px" : "12px")};
     font-weight: 760;
     white-space: nowrap;
   }
@@ -397,15 +541,48 @@ export const QuickActionButton = styled.button`
   small {
     overflow: hidden;
     color: var(--porty-subtext);
-    font-size: 9px;
+    font-size: ${({ $featured }) => ($featured ? "10px" : "9px")};
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  .action-arrow {
+    margin-left: auto;
+    flex: 0 0 auto;
+    color: var(--porty-subtext);
+    opacity: 0.68;
   }
 
   &:hover {
     border-color: var(--porty-primary);
     background: ${({ $isDark }) => ($isDark ? "#223A2F" : palette.mint)};
     transform: translateY(-1px);
+
+    .action-arrow {
+      color: var(--porty-primary-hover);
+      opacity: 1;
+    }
+  }
+
+  @media (max-width: 480px) {
+    min-height: ${({ $featured }) => ($featured ? "98px" : "66px")};
+    align-items: flex-start;
+    flex-wrap: wrap;
+
+    > div {
+      width: ${({ $featured }) => ($featured ? "calc(100% - 48px)" : "auto")};
+    }
+
+    small {
+      white-space: normal;
+      line-height: 1.35;
+    }
+
+    .action-arrow {
+      position: absolute;
+      right: 10px;
+      top: 14px;
+    }
   }
 `;
 
@@ -426,15 +603,15 @@ export const InputArea = styled.footer`
 
 export const InputWrapper = styled.div`
   width: min(100%, 820px);
-  min-height: 56px;
+  min-height: 60px;
   margin: 0 auto;
-  padding: 6px 7px 6px 18px;
+  padding: 7px 8px 7px 15px;
   display: flex;
   align-items: center;
   gap: 10px;
   border: 1px solid
     ${({ $isDark }) => ($isDark ? "#3A443F" : "#D6E1DC")};
-  border-radius: 19px;
+  border-radius: 21px;
   background: ${({ $isDark }) => ($isDark ? "#252E29" : "#F7FAF7")};
   box-shadow: 0 9px 26px rgba(54, 91, 72, 0.07);
   transition:
@@ -446,6 +623,15 @@ export const InputWrapper = styled.div`
     background: var(--porty-surface);
     box-shadow: 0 0 0 4px rgba(120, 214, 173, 0.16);
   }
+`;
+
+export const InputIcon = styled.span`
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  display: grid;
+  place-items: center;
+  color: var(--porty-primary-hover);
 `;
 
 export const StyledInput = styled.input`

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Bell, Loader, Menu, Send } from "react-feather";
+import { Coffee, Loader, Search, Send, Settings } from "react-feather";
 import { sendChatMessage } from "../api/chatApi";
 
 import ChatBubble from "../components/ChatBubble";
@@ -12,6 +12,7 @@ import StudentNewsCard from "../components/StudentNewsCard";
 import CampusMap from "../components/CampusMap";
 import CourseRegist from "../components/CourseRegist";
 import FAQPreview from "../components/FAQPreview";
+import WelcomeIntro from "../components/WelcomeIntro";
 
 import Toast from "../components/Toast";
 import SettingsModal from "../components/SettingsModal";
@@ -33,6 +34,7 @@ import {
   ChatBody,
   InputArea,
   InputWrapper,
+  InputIcon,
   StyledInput,
   SendButton,
 } from "../styles/ChatPage.styles";
@@ -50,12 +52,11 @@ const getOrCreateSessionId = () => {
   return sessionId;
 };
 
-const CHAT_MEMORY_KEY = "porty_session_chats_v2";
+const CHAT_MEMORY_KEY = "porty_session_chats_v3";
 const INITIAL_CHATS = [
   {
     sender: "porty",
-    text: "안녕하세요! 오늘의 공주대 생활을 함께 찾아볼 포티예요 🌱\n궁금한 내용을 편하게 물어보세요.",
-    showQuickActions: true,
+    showWelcome: true,
   },
 ];
 
@@ -104,10 +105,11 @@ const ChatPage = () => {
     const serializableChats = chats
       .filter((chat) => chat.text)
       .slice(-24)
-      .map(({ sender, text, showQuickActions, presentation }) => ({
+      .map(({ sender, text, showQuickActions, showWelcome, presentation }) => ({
         sender,
         text,
         showQuickActions: Boolean(showQuickActions),
+        showWelcome: Boolean(showWelcome),
         presentation: presentation || null,
       }));
     sessionStorage.setItem(
@@ -287,7 +289,7 @@ const ChatPage = () => {
               title="식단 설정"
               aria-label="식단 설정 열기"
             >
-              <Bell size={19} />
+              <Coffee size={19} />
             </NotificationButton>
 
             <MenuButton
@@ -296,7 +298,7 @@ const ChatPage = () => {
               title="포티 설정"
               aria-label="포티 설정 열기"
             >
-              <Menu size={20} />
+              <Settings size={20} />
             </MenuButton>
           </HeaderActions>
         </HeaderContent>
@@ -319,7 +321,14 @@ const ChatPage = () => {
       <ChatBody ref={chatBodyRef} $isDark={isDarkMode}>
         {chats.map((c, idx) => (
           <div key={idx}>
-            {c.presentation?.type === "shuttle" ? (
+            {c.showWelcome ? (
+              <WelcomeIntro
+                onActionClick={sendMessage}
+                onDietSetup={() => setShowDietModal(true)}
+                hasDietSettings={!!dietSettings}
+                isDark={isDarkMode}
+              />
+            ) : c.presentation?.type === "shuttle" ? (
               <div style={{ display: "flex" }}>
                 <ShuttleCard
                   data={c.presentation}
@@ -349,6 +358,7 @@ const ChatPage = () => {
                 {c.showQuickActions && (
                   <QuickActions
                     onActionClick={sendMessage}
+                    onDietSetup={() => setShowDietModal(true)}
                     hasDietSettings={!!dietSettings}
                     isDark={isDarkMode}
                   />
@@ -369,13 +379,16 @@ const ChatPage = () => {
 
       <InputArea $isDark={isDarkMode}>
         <InputWrapper $isDark={isDarkMode}>
+          <InputIcon aria-hidden="true">
+            <Search size={18} />
+          </InputIcon>
           <StyledInput
             $isDark={isDarkMode}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onFocus={() => setShowFAQ(true)}
             onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-            placeholder="공주대 9공학관은 어디야?"
+            placeholder="궁금한 학교생활을 물어보세요"
           />
 
           <SendButton
