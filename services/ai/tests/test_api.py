@@ -2,6 +2,7 @@ from fastapi.testclient import TestClient
 
 import app.main as main
 from app.main import app
+from app.meal_scraper import Meal, MealResult
 
 
 def test_health_reports_loaded_documents():
@@ -145,7 +146,27 @@ def test_query_uses_vercel_runtime_oidc_header(monkeypatch):
     assert captured["token"] == "short-lived-test-token"
 
 
-def test_query_routes_live_meal_question_to_official_page():
+def test_query_returns_live_meal_instead_of_only_official_link(monkeypatch):
+    monkeypatch.setattr(
+        main,
+        "fetch_meals",
+        lambda **_: MealResult(
+            campus="공주",
+            location="학생식당",
+            target_date="2026-07-24",
+            meals=(
+                Meal(
+                    date="2026-07-24",
+                    type="중식",
+                    menu="쇠고기무국 · 떡볶이 · 김말이튀김",
+                    restaurant="신관 늘솜",
+                ),
+            ),
+            source_url="https://www.kongju.ac.kr/KNU/16863/subview.do",
+            fetched_at="2026-07-24T12:00:00+09:00",
+        ),
+    )
+
     with TestClient(app) as client:
         response = client.post(
             "/api/ai/query",
@@ -157,21 +178,43 @@ def test_query_routes_live_meal_question_to_official_page():
         )
 
     payload = response.json()
-    assert payload["sources"][0]["title"] == "학식 식단 확인"
-    assert "오늘" in payload["response"]
-    assert "https://www.kongju.ac.kr/KNU/16863/subview.do" in payload["response"]
+    assert payload["mode"] == "structured"
+    assert payload["sources"][0]["title"] == "실시간 식단"
+    assert "쇠고기무국" in payload["response"]
+    assert "신관 늘솜 · 중식" in payload["response"]
 
 
-def test_meal_endpoint_never_returns_stale_menu_as_current():
+def test_meal_endpoint_returns_scraped_meals(monkeypatch):
+    monkeypatch.setattr(
+        main,
+        "fetch_meals",
+        lambda **_: MealResult(
+            campus="공주",
+            location="기숙사",
+            target_date="2026-07-24",
+            meals=(
+                Meal(
+                    date="2026-07-24",
+                    type="중식",
+                    menu="쇠고기무국 · 떡볶이",
+                    restaurant="공주 은행사/홍익사/해오름집",
+                ),
+            ),
+            source_url="https://dormi.kongju.ac.kr/HOME/sub.php?code=041301",
+            fetched_at="2026-07-24T12:00:00+09:00",
+        ),
+    )
+
     with TestClient(app) as client:
         response = client.get(
-            "/api/ai/meal/공주?location=학생식당"
+            "/api/ai/meal/공주?location=기숙사&dorm=은행사/홍익사/해오름집"
         )
 
     payload = response.json()
-    assert payload["status"] == "official-link-required"
-    assert payload["meals"] == []
-    assert payload["source_url"].endswith("/16863/subview.do")
+    assert payload["status"] == "live"
+    assert payload["meals"][0]["type"] == "중식"
+    assert "쇠고기무국" in payload["meals"][0]["menu"]
+    assert payload["source_url"].endswith("code=041301")
 
 
 def test_current_shuttle_question_returns_period_routes_and_times():

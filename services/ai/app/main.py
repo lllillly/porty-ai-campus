@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
-from datetime import datetime
+from datetime import date, datetime
 from typing import Any
 from zoneinfo import ZoneInfo
 
@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .config import Settings, load_settings
 from .generator import extractive_answer, generate_grounded_answer
+from .meal_scraper import MealResult, MealScrapeError, fetch_meals
 from .models import QueryRequest, QueryResponse, Source
 from .retrieval import LexicalRetriever, read_json, tokenize
 
@@ -36,6 +37,7 @@ SHUTTLE_ROUTE_SUMMARY = (
     ("대전 → 천안", "07:30 출발"),
     ("대전 → 예산", "월요일 07:40 출발"),
 )
+MEAL_SOURCE_URL = "https://www.kongju.ac.kr/KNU/16863/subview.do"
 
 
 @asynccontextmanager
@@ -85,6 +87,131 @@ def small_talk_response(message: str) -> str | None:
         ):
             return response
     return None
+
+
+def meal_selection(message: str) -> tuple[str, str, str | None] | None:
+    if not any(
+        keyword in message
+        for keyword in ("학식", "식단", "학생식당", "오늘 메뉴", "메뉴 알려")
+    ):
+        return None
+
+    campus = "공주"
+    for candidate in ("천안", "예산", "공주", "신관"):
+        if candidate in message:
+            campus = "공주" if candidate == "신관" else candidate
+            break
+
+    location = (
+        "기숙사"
+        if any(keyword in message for keyword in ("기숙사", "생활관"))
+        else "학생식당"
+    )
+    dorm = None
+    dorm_names = (
+        "은행사/홍익사/해오름집",
+        "비전/블룸하우스",
+        "드림하우스",
+        "천안 기숙사",
+        "예산 기숙사",
+    )
+    for candidate in dorm_names:
+        if candidate in message or any(
+            part in message for part in candidate.split("/")
+        ):
+            dorm = candidate
+            break
+    return campus, location, dorm
+
+
+def meal_payload(result: MealResult) -> dict[str, Any]:
+    has_meals = bool(result.meals)
+    place = (
+        result.meals[0].restaurant
+        if has_meals
+        else f"{result.campus} {result.location}"
+    )
+    message = (
+        f"{result.target_date} {place} 공식 식단을 실시간으로 불러왔습니다."
+        if has_meals
+        else (
+            f"{result.target_date} {place}의 등록된 식단이 없습니다. "
+            "방학·주말이거나 학교에서 아직 식단을 등록하지 않은 경우입니다."
+        )
+    )
+    return {
+        "status": "live" if has_meals else "no-menu",
+        "campus": result.campus,
+        "location": result.location,
+        "date": result.target_date,
+        "meals": [meal.as_dict() for meal in result.meals],
+        "message": message,
+        "source_url": result.source_url,
+        "fetched_at": result.fetched_at,
+    }
+
+
+def meal_response(message: str) -> QueryResponse | None:
+    selection = meal_selection(message)
+    if selection is None:
+        return None
+    campus, location, dorm = selection
+
+    try:
+        result = fetch_meals(campus=campus, location=location, dorm=dorm)
+    except MealScrapeError:
+        return QueryResponse(
+            response=(
+                "공식 식단 페이지에 일시적으로 연결하지 못했습니다. "
+                "잠시 후 다시 시도해 주세요.\n\n"
+                f"[공식 식단 페이지]({MEAL_SOURCE_URL})"
+            ),
+            mode="fallback",
+        )
+
+    payload = meal_payload(result)
+    if not result.meals:
+        return QueryResponse(
+            response=(
+                f"{payload['message']}\n\n"
+                f"[공식 식단 페이지]({result.source_url})"
+            ),
+            sources=[
+                Source(
+                    category="학생생활",
+                    title="실시간 식단",
+                    snippet=payload["message"],
+                    score=1.0,
+                    source_url=result.source_url,
+                    reference_date=result.target_date,
+                )
+            ],
+            mode="structured",
+        )
+
+    lines = [payload["message"]]
+    for meal in result.meals:
+        lines.append(
+            f"- {meal.restaurant} · {meal.type}: {meal.menu}"
+        )
+    lines.append(f"\n[공식 식단 페이지]({result.source_url})")
+    return QueryResponse(
+        response="\n".join(lines),
+        sources=[
+            Source(
+                category="학생생활",
+                title="실시간 식단",
+                snippet="\n".join(
+                    f"{meal.restaurant} {meal.type}: {meal.menu}"
+                    for meal in result.meals
+                ),
+                score=1.0,
+                source_url=result.source_url,
+                reference_date=result.target_date,
+            )
+        ],
+        mode="structured",
+    )
 
 
 def shuttle_response(message: str) -> QueryResponse | None:
@@ -366,6 +493,9 @@ def query(body: QueryRequest, request: Request) -> QueryResponse:
             mode="fallback",
         )
 
+    if response := meal_response(message):
+        return response
+
     if response := small_talk_response(message):
         return QueryResponse(response=response, mode="small-talk")
 
@@ -433,16 +563,28 @@ def schedule() -> dict[str, Any]:
 
 
 @app.get("/api/ai/meal/{campus}")
-def meal(campus: str, location: str, dorm: str | None = None) -> dict[str, Any]:
-    return {
-        "status": "official-link-required",
-        "campus": campus,
-        "location": location,
-        "dorm": dorm,
-        "meals": [],
-        "message": (
-            "식단은 매일 변경되므로 저장된 메뉴를 표시하지 않습니다. "
-            "학교 공식 식단 페이지에서 오늘 메뉴를 확인해 주세요."
-        ),
-        "source_url": "https://www.kongju.ac.kr/KNU/16863/subview.do",
-    }
+def meal(
+    campus: str,
+    location: str,
+    dorm: str | None = None,
+    target_date: date | None = None,
+) -> dict[str, Any]:
+    try:
+        result = fetch_meals(
+            campus=campus,
+            location=location,
+            dorm=dorm,
+            target_date=target_date,
+        )
+        return meal_payload(result)
+    except MealScrapeError as error:
+        return {
+            "status": "error",
+            "campus": campus,
+            "location": location,
+            "date": (target_date or datetime.now(KOREA_TIMEZONE).date()).isoformat(),
+            "meals": [],
+            "message": str(error),
+            "source_url": MEAL_SOURCE_URL,
+            "fetched_at": datetime.now(KOREA_TIMEZONE).isoformat(timespec="seconds"),
+        }

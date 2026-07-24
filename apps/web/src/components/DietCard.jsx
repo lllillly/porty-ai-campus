@@ -17,6 +17,8 @@ const DietCard = ({ campus, place, dorm, onBackToMain }) => {
             status: result.status,
             message: result.message,
             meals: result.meals || [],
+            sourceUrl: result.source_url,
+            fetchedAt: result.fetched_at,
           });
         }
       })
@@ -39,7 +41,11 @@ const DietCard = ({ campus, place, dorm, onBackToMain }) => {
       <Header>
         <CardTitle>{title}</CardTitle>
         <StatusBadge $active={state.meals.length > 0}>
-          {state.meals.length > 0 ? "연동됨" : "연동 준비 중"}
+          {state.meals.length > 0
+            ? "실시간"
+            : state.status === "no-menu"
+              ? "등록 없음"
+              : "연결 확인 중"}
         </StatusBadge>
       </Header>
 
@@ -57,14 +63,25 @@ const DietCard = ({ campus, place, dorm, onBackToMain }) => {
         )}
 
       {state.meals.map((meal) => (
-        <MealSection key={`${meal.date}-${meal.type}`}>
-          <strong>{meal.type}</strong>
+        <MealSection key={`${meal.restaurant}-${meal.date}-${meal.type}`}>
+          <strong>
+            {meal.restaurant} · {meal.type}
+          </strong>
           <span>{meal.menu}</span>
         </MealSection>
       ))}
 
+      {state.fetchedAt && (
+        <FetchedAt>
+          {new Date(state.fetchedAt).toLocaleString("ko-KR")} 기준 조회
+        </FetchedAt>
+      )}
+
       <OfficialLink
-        href="https://www.kongju.ac.kr/KNU/16863/subview.do"
+        href={
+          state.sourceUrl ||
+          "https://www.kongju.ac.kr/KNU/16863/subview.do"
+        }
         target="_blank"
         rel="noreferrer"
       >
@@ -115,6 +132,13 @@ const MealSection = styled.div`
   background: var(--porty-surface-soft);
   color: var(--porty-text);
   font-size: 0.82rem;
+`;
+
+const FetchedAt = styled.p`
+  margin: 0.65rem 0 0;
+  color: var(--porty-text-muted);
+  font-size: 0.7rem;
+  text-align: right;
 `;
 
 const OfficialLink = styled.a`
