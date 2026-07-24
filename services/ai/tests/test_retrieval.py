@@ -93,6 +93,13 @@ def test_knowledge_base_excludes_personal_community_boards():
     )
 
 
+def test_retriever_excludes_sitemap_navigation_documents(retriever):
+    assert all(
+        "fnctId=sitemap" not in document.content
+        for document in retriever.documents
+    )
+
+
 def test_answer_context_includes_source_metadata(retriever):
     hit = retriever.search("수강신청 방법", 1)[0]
     context = build_context([hit])

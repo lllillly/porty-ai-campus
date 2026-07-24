@@ -94,6 +94,48 @@ def test_latest_student_news_returns_live_card_data(monkeypatch):
     assert "학생부종합전형" not in payload["response"]
 
 
+def test_specific_student_notice_link_returns_matching_live_post(monkeypatch):
+    notice = StudentNewsItem(
+        title="2026학년도 2학기 전남대학교 학점교류 수학 안내[HUSS]",
+        date="2026.07.24",
+        author="학사지원과",
+        url=(
+            "https://www.kongju.ac.kr/bbs/KNU/2132/429650/"
+            "artclView.do"
+        ),
+        preview="이미지 또는 첨부파일로 제공되는 공지입니다.",
+    )
+    monkeypatch.setattr(
+        main,
+        "fetch_matching_student_news",
+        lambda *_args, **_kwargs: (notice,),
+    )
+
+    with TestClient(app) as client:
+        payload = client.post(
+            "/api/ai/query",
+            json={
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": (
+                            "2026학년도 2학기 전남대학교 학점교류 수학 "
+                            "안내[HUSS] 링크를 줘"
+                        ),
+                    }
+                ]
+            },
+        ).json()
+
+    assert payload["mode"] == "structured"
+    assert payload["sources"][0]["source_url"].endswith(
+        "/429650/artclView.do"
+    )
+    assert "전남대학교 학점교류" in payload["response"]
+    assert "fnctId=sitemap" not in payload["response"]
+    assert "상근예비역" not in payload["response"]
+
+
 def test_student_news_follow_up_uses_previous_results(monkeypatch):
     captured = {}
 

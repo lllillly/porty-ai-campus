@@ -1,7 +1,9 @@
 from app.student_news import (
     StudentNewsItem,
+    fetch_matching_student_news,
     parse_student_news_detail,
     parse_student_news_list,
+    student_news_search_term,
 )
 
 
@@ -39,6 +41,73 @@ def test_parse_student_news_list_returns_latest_three_student_posts():
     ]
     assert items[2].preview == "이미지 또는 첨부파일로 제공되는 공지입니다."
     assert items[0].url.endswith("/bbs/KNU/2132/103/artclView.do?layout=unknown")
+
+
+def test_parse_student_news_table_reads_current_notice_metadata():
+    html = """
+    <table>
+      <tr>
+        <td class="td-num">12653</td>
+        <td class="td-subject">
+          <a href="/bbs/KNU/2132/429650/artclView.do">
+            <strong>
+              2026학년도 2학기 전남대학교 학점교류 수학 안내[HUSS]
+            </strong>
+          </a>
+        </td>
+        <td class="td-write">학사지원과</td>
+        <td class="td-date">2026.07.24</td>
+      </tr>
+    </table>
+    """
+
+    item = parse_student_news_list(html, limit=1)[0]
+
+    assert item.title == "2026학년도 2학기 전남대학교 학점교류 수학 안내[HUSS]"
+    assert item.date == "2026.07.24"
+    assert item.author == "학사지원과"
+    assert item.url.endswith("/bbs/KNU/2132/429650/artclView.do")
+
+
+def test_matching_student_news_prefers_title_over_pinned_notices():
+    html = """
+    <table>
+      <tr>
+        <td class="td-subject">
+          <a href="/bbs/KNU/2132/427703/artclView.do">
+            <strong>모바일 앱 서비스 안내</strong>
+          </a>
+        </td>
+        <td class="td-write">정보화본부</td>
+        <td class="td-date">2026.01.01</td>
+      </tr>
+      <tr>
+        <td class="td-subject">
+          <a href="/bbs/KNU/2132/429650/artclView.do">
+            <strong>
+              2026학년도 2학기 전남대학교 학점교류 수학 안내[HUSS]
+            </strong>
+          </a>
+        </td>
+        <td class="td-write">학사지원과</td>
+        <td class="td-date">2026.07.24</td>
+      </tr>
+    </table>
+    """
+    requested_urls = []
+
+    items = fetch_matching_student_news(
+        "2026학년도 2학기 전남대학교 학점교류 수학 안내[HUSS] 링크를 줘",
+        downloader=lambda url: requested_urls.append(url) or html,
+    )
+
+    assert student_news_search_term(
+        "2026학년도 2학기 전남대학교 학점교류 수학 안내[HUSS] 링크를 줘"
+    ) == "2026학년도 2학기 전남대학교 학점교류 수학 안내[HUSS]"
+    assert "srchColumn=sj" in requested_urls[0]
+    assert [item.url for item in items] == [
+        "https://www.kongju.ac.kr/bbs/KNU/2132/429650/artclView.do"
+    ]
 
 
 def test_parse_student_news_detail_keeps_body_image_and_attachments():

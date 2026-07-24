@@ -193,6 +193,8 @@ class BM25Retriever:
             content = str(raw.get("content", "")).strip()
             if len(content) < 40:
                 continue
+            if "fnctId=sitemap" in content:
+                continue
 
             title = clean_text(str(raw.get("title", ""))) or "공주대학교 안내"
             category = clean_text(str(raw.get("category", ""))) or "학교안내"

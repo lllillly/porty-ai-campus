@@ -21,8 +21,11 @@ from .student_news import (
     StudentNewsError,
     StudentNewsItem,
     fetch_latest_student_news,
+    fetch_matching_student_news,
     fetch_student_news_details,
     fetched_at as student_news_fetched_at,
+    student_news_search_term,
+    student_news_search_url,
 )
 
 
@@ -171,6 +174,73 @@ def _selected_news_indices(message: str, item_count: int) -> list[int]:
         if index < item_count and any(term in normalized for term in terms):
             return [index]
     return list(range(item_count))
+
+
+def student_news_link_response(message: str) -> QueryResponse | None:
+    normalized = re.sub(r"\s+", "", message)
+    has_link_intent = any(
+        keyword in normalized
+        for keyword in ("링크", "원문", "게시글", "페이지주소")
+    )
+    looks_like_notice_title = any(
+        keyword in normalized
+        for keyword in ("안내", "공지", "모집", "학점교류")
+    )
+    search_term = student_news_search_term(message)
+    search_words = re.findall(r"[가-힣A-Za-z0-9]+", search_term)
+    if (
+        not has_link_intent
+        or not looks_like_notice_title
+        or len(search_words) < 3
+    ):
+        return None
+
+    search_url = student_news_search_url(search_term)
+    try:
+        items = fetch_matching_student_news(search_term, limit=3)
+    except StudentNewsError:
+        items = ()
+
+    if not items:
+        return QueryResponse(
+            response=(
+                "공식 학생소식에서 제목과 일치하는 공지를 찾지 못했습니다. "
+                "아래 검색 결과에서 제목을 다시 확인해 주세요.\n\n"
+                f"[학생소식 제목 검색]({search_url})"
+            ),
+            sources=[
+                Source(
+                    category="학생소식",
+                    title=f"학생소식 검색: {search_term}",
+                    snippet="국립공주대학교 공식 학생소식 제목 검색 결과",
+                    score=1.0,
+                    source_url=search_url,
+                )
+            ],
+            mode="fallback",
+        )
+
+    item = items[0]
+    lines = [
+        "요청하신 공지의 공식 링크입니다.",
+        "",
+        f"[{item.title}]({item.url})",
+        f"- 등록일: {item.date}"
+        + (f" · 작성자: {item.author}" if item.author else ""),
+    ]
+    return QueryResponse(
+        response="\n".join(lines),
+        sources=_student_news_sources((item,)),
+        presentation={
+            "type": "student-news",
+            "view": "list",
+            "title": "찾은 학생소식",
+            "items": [item.as_dict()],
+            "fetchedAt": student_news_fetched_at(),
+            "sourceUrl": search_url,
+        },
+        mode="structured",
+    )
 
 
 def student_news_response(
@@ -1090,6 +1160,9 @@ def query(body: QueryRequest, request: Request) -> QueryResponse:
 
     if response := small_talk_response(message):
         return QueryResponse(response=response, mode="small-talk")
+
+    if response := student_news_link_response(message):
+        return response
 
     if response := student_news_response(body, message):
         return response

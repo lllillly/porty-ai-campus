@@ -3,9 +3,10 @@ from __future__ import annotations
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from datetime import datetime
+from difflib import SequenceMatcher
 import re
 from typing import Callable, Sequence
-from urllib.parse import urljoin
+from urllib.parse import urlencode, urljoin
 from zoneinfo import ZoneInfo
 
 from bs4 import BeautifulSoup
@@ -19,8 +20,16 @@ KONGJU_HOME_URL = "https://www.kongju.ac.kr/KNU/index.do"
 STUDENT_NEWS_URL = (
     "https://www.kongju.ac.kr/bbs/KNU/2132/artclList.do?layout=unknown"
 )
+STUDENT_NEWS_SEARCH_URL = (
+    "https://www.kongju.ac.kr/bbs/KNU/2132/artclList.do"
+)
 STUDENT_NEWS_LINK_PATTERN = re.compile(
-    r"^/bbs/KNU/2132/\d+/artclView\.do"
+    r"/bbs/KNU/2132/\d+/artclView\.do"
+)
+NOTICE_LINK_SUFFIX_PATTERN = re.compile(
+    r"\s*(?:링크|원문|게시글|페이지|주소)(?:를|을|도)?"
+    r"\s*(?:알려\s*줘|알려\s*주세요|보여\s*줘|찾아\s*줘|줘|주세요)?"
+    r"\s*[.!?]*$"
 )
 
 
@@ -56,6 +65,39 @@ def _clean(value: str) -> str:
     return re.sub(r"\s+", " ", value).strip()
 
 
+def student_news_search_term(message: str) -> str:
+    return NOTICE_LINK_SUFFIX_PATTERN.sub("", _clean(message)).strip()
+
+
+def student_news_search_url(search_term: str) -> str:
+    query = urlencode(
+        {
+            "srchColumn": "sj",
+            "srchWrd": _clean(search_term)[:160],
+        }
+    )
+    return f"{STUDENT_NEWS_SEARCH_URL}?{query}"
+
+
+def _title_key(value: str) -> str:
+    return re.sub(r"[^가-힣a-z0-9]", "", value.lower())
+
+
+def _title_score(query: str, title: str) -> float:
+    query_key = _title_key(query)
+    title_key = _title_key(title)
+    if not query_key or not title_key:
+        return 0.0
+    if title_key in query_key or query_key in title_key:
+        return 1.0
+
+    query_terms = set(re.findall(r"[가-힣A-Za-z0-9]+", query.lower()))
+    title_terms = set(re.findall(r"[가-힣A-Za-z0-9]+", title.lower()))
+    overlap = len(query_terms & title_terms) / max(len(title_terms), 1)
+    similarity = SequenceMatcher(None, query_key, title_key).ratio()
+    return overlap * 0.7 + similarity * 0.3
+
+
 def parse_student_news_list(
     html: str,
     *,
@@ -65,30 +107,43 @@ def parse_student_news_list(
     items: list[StudentNewsItem] = []
     seen_urls: set[str] = set()
 
-    for anchor in soup.select('a.subject[href*="/bbs/KNU/2132/"]'):
+    anchors = soup.select(
+        'a.subject[href*="/bbs/KNU/2132/"], '
+        'td.td-subject a[href*="/bbs/KNU/2132/"]'
+    )
+    for anchor in anchors:
         href = str(anchor.get("href", "")).strip()
-        if not STUDENT_NEWS_LINK_PATTERN.match(href) or href in seen_urls:
+        url = urljoin(KONGJU_HOME_URL, href)
+        if not STUDENT_NEWS_LINK_PATTERN.search(url) or url in seen_urls:
             continue
 
-        title_node = anchor.select_one(".sj")
+        row = anchor.find_parent("tr")
+        title_node = anchor.select_one(".sj, strong")
         date_node = anchor.select_one(".date")
+        if date_node is None and row is not None:
+            date_node = row.select_one(".td-date")
         preview_node = anchor.select_one(".cn")
+        author_node = row.select_one(".td-write") if row is not None else None
         title = _clean(title_node.get_text(" ")) if title_node else ""
         date = _clean(date_node.get_text(" ")) if date_node else ""
         preview = _clean(preview_node.get_text(" ")) if preview_node else ""
         if not title or not date:
             continue
 
-        url = urljoin(KONGJU_HOME_URL, href)
         items.append(
             StudentNewsItem(
                 title=title,
                 date=date,
                 url=url,
                 preview=preview or "이미지 또는 첨부파일로 제공되는 공지입니다.",
+                author=(
+                    _clean(author_node.get_text(" "))
+                    if author_node is not None
+                    else None
+                ),
             )
         )
-        seen_urls.add(href)
+        seen_urls.add(url)
         if len(items) >= limit:
             break
 
@@ -180,6 +235,31 @@ def fetch_latest_student_news(
             limit=limit,
         )
     )
+
+
+def fetch_matching_student_news(
+    query: str,
+    *,
+    limit: int = 3,
+    downloader: Callable[[str], str] = _download,
+) -> tuple[StudentNewsItem, ...]:
+    search_term = student_news_search_term(query)
+    if len(search_term) < 4:
+        return ()
+
+    items = parse_student_news_list(
+        downloader(student_news_search_url(search_term)),
+        limit=30,
+    )
+    ranked = sorted(
+        (
+            (_title_score(search_term, item.title), item)
+            for item in items
+        ),
+        key=lambda result: result[0],
+        reverse=True,
+    )
+    return tuple(item for score, item in ranked if score >= 0.62)[:limit]
 
 
 def fetch_student_news_details(
