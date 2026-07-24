@@ -8,7 +8,7 @@ const ChatBubble = ({ message, isUser, isDark }) => {
     <MessageWrapper $isUser={isUser}>
       {!isUser && (
         <AvatarWrapper $isDark={isDark}>
-          <img src="/assets/knung.png" alt="크눙이" />
+          <img src="/assets/knung-icon.png" alt="크눙이" />
         </AvatarWrapper>
       )}
       <MessageBubble $isUser={isUser} $isDark={isDark}>

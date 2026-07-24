@@ -16,7 +16,7 @@ describe("WelcomeIntro", () => {
     );
 
     expect(markup).toContain(
-      "안녕하세요, 국립공주대학교 챗봇 포티입니다.",
+      "안녕하세요! 공주대학교 챗봇 포티입니다.",
     );
     expect(markup).toContain("학사일정");
     expect(markup).toContain("순환버스");

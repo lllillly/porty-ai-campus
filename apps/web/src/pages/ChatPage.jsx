@@ -244,10 +244,10 @@ const ChatPage = () => {
             title="포티와 새 대화 시작하기"
             aria-label="포티와 새 대화 시작하기"
           >
-            <Logo src="/assets/knung.png" alt="" $isDark={isDarkMode} />
+            <Logo src="/assets/knung-icon.png" alt="" $isDark={isDarkMode} />
             <BrandCopy>
               <BrandName $isDark={isDarkMode}>포티</BrandName>
-              <BrandStatus $isDark={isDarkMode}>오늘의 캠퍼스 메이트</BrandStatus>
+              <BrandStatus $isDark={isDarkMode}>공주대 생활 도우미</BrandStatus>
             </BrandCopy>
           </BrandButton>
 
@@ -275,7 +275,11 @@ const ChatPage = () => {
 
       {toastMessage && <Toast message={toastMessage} />}
 
-      <ChatBody ref={chatBodyRef} $isDark={isDarkMode}>
+      <ChatBody
+        ref={chatBodyRef}
+        $isDark={isDarkMode}
+        $isWelcome={chats.length === 1 && chats[0].showWelcome}
+      >
         {chats.map((c, idx) => (
           <div key={idx} ref={idx === chats.length - 1 ? lastChatRef : null}>
             <ChatMessage

@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./apps/web/public/assets/knung.png" width="112" alt="포티 캐릭터 크눙이" />
+  <img src="./apps/web/public/assets/knung-icon.png" width="112" alt="포티 캐릭터 크눙이" />
 </p>
 
 <h1 align="center">PORTY</h1>
@@ -135,7 +135,7 @@ flowchart LR
 | 영역 | 기술 | 선택 이유 |
 | --- | --- | --- |
 | Frontend | React 19, Vite 8 | 카드 단위 상태 관리와 빠른 개발·빌드 환경 |
-| Styling | styled-components | 대화 카드별 동적 스타일과 다크 모드 처리 |
+| Styling | styled-components, Pretendard | 대화 카드별 동적 스타일, 다크 모드와 일관된 한글 타이포그래피 처리 |
 | API | FastAPI, Pydantic | 질문 유형별 응답 스키마와 Python 수집 로직을 한 서비스에서 관리 |
 | 수집 | httpx, BeautifulSoup | 학교·생활관 페이지의 실시간 데이터 파싱 |
 | 검색 | 한국어 토큰 확장 + BM25 계열 검색 | 별도 벡터 DB 없이 작은 공식 문서 집합을 빠르게 검색 |

@@ -8,8 +8,8 @@ export const ModalBackdrop = styled.div`
   align-items: center;
   justify-content: center;
   padding: 20px;
-  background: rgba(11, 20, 16, 0.52);
-  backdrop-filter: blur(4px);
+  background: rgba(35, 43, 39, 0.38);
+  backdrop-filter: blur(5px);
 
   @media (max-width: 560px) {
     align-items: flex-end;
@@ -22,10 +22,10 @@ export const ModalContainer = styled.section`
   max-height: calc(100dvh - 40px);
   overflow-y: auto;
   padding: 24px;
-  border: 1px solid var(--porty-border);
-  border-radius: 24px;
+  border: 0;
+  border-radius: 28px;
   background: var(--porty-surface);
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 24px 64px rgba(43, 58, 51, 0.16);
   color: var(--porty-text);
   animation: popIn 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
 
@@ -146,7 +146,7 @@ export const SaveButton = styled.button`
   margin-top: 22px;
   padding: 11px 16px;
   border: 0;
-  border-radius: 13px;
+  border-radius: 16px;
   background: var(--porty-primary);
   color: #10251a;
   font-size: 14px;
@@ -169,8 +169,8 @@ export const DeleteButton = styled.button`
   min-height: 44px;
   margin-top: 8px;
   padding: 10px 16px;
-  border: 1px solid var(--porty-border);
-  border-radius: 13px;
+  border: 0;
+  border-radius: 16px;
   background: var(--porty-surface-soft);
   color: var(--porty-subtext);
   font-size: 14px;

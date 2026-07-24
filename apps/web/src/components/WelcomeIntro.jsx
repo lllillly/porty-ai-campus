@@ -17,23 +17,25 @@ const WelcomeIntro = ({
 }) => {
   return (
     <WelcomeCard>
-      <WelcomeCopy>
+      <WelcomeCopy $isDark={isDark}>
         <WelcomeCharacter>
-          <img src="/assets/knung.png" alt="크눙이" />
+          <img src="/assets/knung-greeting.png" alt="손을 흔들며 인사하는 크눙이" />
         </WelcomeCharacter>
 
         <div>
           <WelcomeTitle>
-            안녕하세요, 국립공주대학교 챗봇 포티입니다.
+            안녕하세요! 공주대학교 챗봇 포티입니다.
           </WelcomeTitle>
           <WelcomeDescription>
-            학사일정부터 식단과 순환버스까지, 학교생활에 필요한 정보를
-            찾아보세요.
+            오늘 필요한 학교생활 정보, 포티에게 편하게 물어보세요.
           </WelcomeDescription>
         </div>
       </WelcomeCopy>
 
-      <WelcomePrompt>바로 찾기</WelcomePrompt>
+      <WelcomePrompt>
+        <span>자주 찾는 메뉴</span>
+        <small>궁금한 내용을 골라 바로 확인해 보세요.</small>
+      </WelcomePrompt>
       <QuickActions
         featured
         onActionClick={onActionClick}

@@ -5,10 +5,12 @@ const palette = {
   greenHover: "#348F6B",
   mint: "#E4F8EF",
   yellow: "#FFD879",
-  canvas: "#F5F8F3",
+  blush: "#F8DFE6",
+  lavender: "#EEEAF8",
+  canvas: "#FAF9F5",
   text: "#26352F",
   subtext: "#718079",
-  border: "#DFE9E2",
+  border: "#E6E8E2",
 };
 
 export const ChatContainer = styled.main`
@@ -25,20 +27,18 @@ export const ChatContainer = styled.main`
 `;
 
 export const Header = styled.header`
-  flex: 0 0 78px;
+  flex: 0 0 72px;
   display: flex;
   align-items: center;
   background: ${({ $isDark }) =>
-    $isDark ? "rgba(29, 37, 33, 0.95)" : "rgba(255, 254, 250, 0.93)"};
+    $isDark ? "rgba(29, 37, 33, 0.96)" : "rgba(255, 253, 249, 0.96)"};
   border-bottom: 1px solid
-    ${({ $isDark }) => ($isDark ? "#34413A" : "#E2EAE4")};
-  box-shadow: ${({ $isDark }) =>
-    $isDark ? "none" : "0 7px 24px rgba(65, 98, 80, 0.05)"};
-  backdrop-filter: blur(20px);
+    ${({ $isDark }) => ($isDark ? "#34413A" : "#ECECE5")};
+  backdrop-filter: blur(16px);
   z-index: 30;
 
   @media (max-width: 768px) {
-    flex-basis: 70px;
+    flex-basis: 66px;
   }
 `;
 
@@ -71,21 +71,19 @@ export const BrandButton = styled.button`
 `;
 
 export const Logo = styled.img`
-  width: 48px;
-  height: 48px;
-  flex: 0 0 48px;
-  padding: 2px;
-  border: 2px solid
-    ${({ $isDark }) => ($isDark ? "#405047" : "#FFFFFF")};
-  border-radius: 14px;
-  background: ${({ $isDark }) => ($isDark ? "#2A352F" : "#FFF3CF")};
-  box-shadow: none;
+  width: 50px;
+  height: 50px;
+  flex: 0 0 50px;
+  padding: 4px;
+  border: 0;
+  border-radius: 50%;
+  background: ${({ $isDark }) => ($isDark ? "#443A22" : "#FFF0C8")};
   object-fit: contain;
 
   @media (max-width: 768px) {
-    width: 43px;
-    height: 43px;
-    flex-basis: 43px;
+    width: 46px;
+    height: 46px;
+    flex-basis: 46px;
   }
 `;
 
@@ -97,46 +95,42 @@ export const BrandCopy = styled.span`
 
 export const BrandName = styled.strong`
   color: ${({ $isDark }) => ($isDark ? "#F5F7F6" : palette.text)};
-  font-size: 18px;
-  font-weight: 850;
+  font-size: 19px;
+  font-weight: 800;
   letter-spacing: -0.04em;
   line-height: 1.15;
 `;
 
 export const BrandStatus = styled.span`
-  display: flex;
-  align-items: center;
-  gap: 5px;
+  display: block;
   color: ${({ $isDark }) => ($isDark ? "#AEB8B3" : palette.subtext)};
   font-size: 11px;
-  font-weight: 650;
+  font-weight: 550;
   line-height: 1.2;
-
-  &::before {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: ${palette.green};
-    box-shadow: 0 0 0 3px rgba(120, 214, 173, 0.18);
-    content: "";
-  }
 `;
 
 export const HeaderActions = styled.div`
   display: flex;
   align-items: center;
   gap: 6px;
+
+  > button:first-child {
+    background: var(--porty-blush);
+  }
+
+  > button:last-child {
+    background: var(--porty-primary-soft);
+  }
 `;
 
 const HeaderIconButton = styled.button`
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: 44px;
   display: grid;
   place-items: center;
-  border: 1px solid
-    ${({ $isDark }) => ($isDark ? "#34413A" : "#E3ECE6")};
-  border-radius: 12px;
-  background: ${({ $isDark }) => ($isDark ? "#252E29" : "#F7FAF7")};
+  border: 0;
+  border-radius: 50%;
+  background: ${({ $isDark }) => ($isDark ? "#252E29" : "#F3F4EF")};
   color: ${({ $isDark }) => ($isDark ? "#D8DEDB" : "#4F5C56")};
   cursor: pointer;
   transition:
@@ -145,7 +139,7 @@ const HeaderIconButton = styled.button`
     transform 160ms ease;
 
   &:hover {
-    background: ${({ $isDark }) => ($isDark ? "#213C31" : "#EAF8F1")};
+    background: ${({ $isDark }) => ($isDark ? "#213C31" : "#E4F8EF")};
     color: ${({ $isDark }) => ($isDark ? "#24D184" : palette.greenHover)};
   }
 
@@ -162,11 +156,11 @@ export const ChatBody = styled.section`
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: clamp(32px, 7vh, 72px) 24px 38px;
+  padding: clamp(24px, 5vh, 48px) 24px 34px;
   display: flex;
   flex-direction: column;
   gap: 18px;
-  background: ${({ $isDark }) => ($isDark ? "#141A17" : "#F6F8F6")};
+  background: ${({ $isDark }) => ($isDark ? "#141A17" : palette.canvas)};
 
   > div {
     width: min(100%, 820px);
@@ -192,70 +186,143 @@ export const ChatBody = styled.section`
     padding: 28px 14px 26px;
     gap: 16px;
   }
+
+  @media (min-width: 721px) and (min-height: 760px) {
+    justify-content: ${({ $isWelcome }) =>
+      $isWelcome ? "center" : "flex-start"};
+  }
 `;
 
 export const WelcomeCard = styled.section`
-  width: min(100%, 720px);
+  width: min(100%, 820px);
+  min-width: 0;
   margin: 0 auto;
-  padding: 18px 0 28px;
+  display: grid;
+  grid-template:
+    "scene prompt" auto
+    "scene actions" 1fr / minmax(290px, 0.92fr) minmax(0, 1.08fr);
+  column-gap: clamp(24px, 4vw, 46px);
+  align-items: start;
+
+  @media (max-width: 720px) {
+    grid-template:
+      "scene" auto
+      "prompt" auto
+      "actions" auto / 1fr;
+    gap: 0;
+  }
 `;
 
 export const WelcomeCopy = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  margin-bottom: 32px;
+  grid-area: scene;
+  min-height: 404px;
+  position: relative;
+  overflow: hidden;
+  padding: 30px;
+  border-radius: 38px 38px 38px 14px;
+  background: ${({ $isDark }) => ($isDark ? "#213C31" : "#E7F7EF")};
 
-  @media (max-width: 620px) {
-    gap: 14px;
-    margin-bottom: 26px;
+  &::before,
+  &::after {
+    position: absolute;
+    border-radius: 50%;
+    content: "";
+  }
+
+  &::before {
+    width: 84px;
+    height: 84px;
+    top: -28px;
+    right: 30px;
+    background: ${({ $isDark }) => ($isDark ? "#49363E" : palette.blush)};
+  }
+
+  &::after {
+    width: 48px;
+    height: 48px;
+    bottom: 26px;
+    left: 24px;
+    background: ${({ $isDark }) => ($isDark ? "#443A22" : "#FFEAB8")};
+  }
+
+  > div:last-child {
+    width: min(100%, 270px);
+    position: relative;
+    z-index: 2;
+    padding: 21px 22px;
+    border-radius: 25px 25px 25px 8px;
+    background: var(--porty-surface);
+    box-shadow: 0 12px 30px rgba(80, 105, 91, 0.08);
+  }
+
+  @media (max-width: 720px) {
+    min-height: 270px;
+    padding: 22px;
+    margin-bottom: 28px;
+
+    > div:last-child {
+      width: min(72%, 310px);
+      padding: 17px 18px;
+    }
+  }
+
+  @media (max-width: 420px) {
+    min-height: 252px;
+    padding: 18px;
+
+    > div:last-child {
+      width: 76%;
+    }
   }
 `;
 
 export const WelcomeCharacter = styled.div`
-  width: 88px;
-  height: 88px;
-  flex: 0 0 88px;
-  display: grid;
-  place-items: center;
-  border: 1px solid var(--porty-border);
-  border-radius: 24px;
-  background: var(--porty-accent-soft);
+  width: 230px;
+  height: 300px;
+  position: absolute;
+  right: -7px;
+  bottom: -19px;
+  z-index: 1;
 
   img {
-    width: 72px;
-    height: 72px;
+    width: 100%;
+    height: 100%;
+    display: block;
     object-fit: contain;
+    object-position: center bottom;
   }
 
-  @media (max-width: 620px) {
-    width: 68px;
-    height: 68px;
-    flex-basis: 68px;
-    border-radius: 19px;
+  @media (max-width: 720px) {
+    width: 164px;
+    height: 226px;
+    right: 5px;
+    bottom: -20px;
+  }
 
-    img {
-      width: 56px;
-      height: 56px;
-    }
+  @media (max-width: 420px) {
+    width: 145px;
+    height: 205px;
+    right: -2px;
   }
 `;
 
 export const WelcomeTitle = styled.h1`
   margin: 0;
   color: var(--porty-text);
-  font-size: clamp(25px, 3vw, 32px);
+  font-size: clamp(22px, 2.4vw, 28px);
   font-weight: 780;
-  letter-spacing: -0.045em;
-  line-height: 1.25;
+  letter-spacing: -0.04em;
+  line-height: 1.32;
+  word-break: keep-all;
 `;
 
 export const WelcomeDescription = styled.p`
-  margin: 8px 0 0;
+  margin: 9px 0 0;
   color: var(--porty-subtext);
   font-size: 13px;
   font-weight: 450;
   line-height: 1.55;
+  word-break: keep-all;
 
   @media (max-width: 520px) {
     font-size: 12px;
@@ -263,10 +330,27 @@ export const WelcomeDescription = styled.p`
 `;
 
 export const WelcomePrompt = styled.p`
-  margin: 0 0 11px;
-  color: var(--porty-subtext);
-  font-size: 12px;
-  font-weight: 700;
+  grid-area: prompt;
+  margin: 10px 0 15px;
+  display: grid;
+  gap: 4px;
+
+  span {
+    color: var(--porty-text);
+    font-size: 18px;
+    font-weight: 760;
+    letter-spacing: -0.025em;
+  }
+
+  small {
+    color: var(--porty-subtext);
+    font-size: 12px;
+    font-weight: 450;
+  }
+
+  @media (max-width: 720px) {
+    margin: 0 2px 14px;
+  }
 `;
 
 export const MessageWrapper = styled.div`
@@ -277,15 +361,14 @@ export const MessageWrapper = styled.div`
 `;
 
 export const AvatarWrapper = styled.div`
-  width: 42px;
-  height: 42px;
-  flex: 0 0 42px;
-  padding: 2px;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  padding: 3px;
   overflow: hidden;
-  border: 2px solid ${({ $isDark }) => ($isDark ? "#34413A" : "#FFFFFF")};
-  border-radius: 12px;
+  border: 0;
+  border-radius: 50%;
   background: var(--porty-accent-soft);
-  box-shadow: none;
 
   img {
     width: 100%;
@@ -298,19 +381,17 @@ export const AvatarWrapper = styled.div`
 export const MessageBubble = styled.div`
   max-width: min(78%, 640px);
   padding: 12px 15px;
-  border: 1px solid
-    ${({ $isDark, $isUser }) =>
-      $isUser ? "rgba(87, 164, 128, 0.12)" : $isDark ? "#34413A" : "#E1EAE4"};
-  border-radius: 16px;
+  border: 0;
+  border-radius: ${({ $isUser }) =>
+    $isUser ? "20px 20px 7px 20px" : "20px 20px 20px 7px"};
   background: ${({ $isDark, $isUser }) =>
     $isUser
       ? $isDark
         ? "#2C6B52"
-        : "#D9F5E8"
+        : "#DDF6E9"
       : $isDark
         ? "#1D2521"
-        : "#FFFEFA"};
-  box-shadow: none;
+        : palette.lavender};
   color: ${({ $isDark, $isUser }) =>
     $isUser ? ($isDark ? "#F2FFF8" : "#214636") : $isDark ? "#F5F7F6" : palette.text};
   font-size: 14px;
@@ -384,15 +465,17 @@ export const MessageBubble = styled.div`
 `;
 
 export const QuickActionsWrapper = styled.div`
+  grid-area: ${({ $featured }) => ($featured ? "actions" : "auto")};
   width: ${({ $featured }) =>
     $featured ? "100%" : "min(calc(100% - 53px), 680px)"};
+  min-width: 0;
   margin: ${({ $featured }) => ($featured ? "0" : "12px 0 0 53px")};
   display: grid;
   grid-template-columns: ${({ $featured }) =>
     $featured
-      ? "repeat(3, minmax(0, 1fr))"
+      ? "repeat(2, minmax(0, 1fr))"
       : "repeat(3, minmax(0, 1fr))"};
-  gap: ${({ $featured }) => ($featured ? "9px" : "8px")};
+  gap: ${({ $featured }) => ($featured ? "10px" : "8px")};
 
   @media (max-width: 620px) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -401,19 +484,21 @@ export const QuickActionsWrapper = styled.div`
 
 export const QuickActionButton = styled.button`
   min-width: 0;
-  min-height: ${({ $featured }) => ($featured ? "78px" : "66px")};
+  min-height: ${({ $featured }) => ($featured ? "92px" : "66px")};
   position: relative;
   display: flex;
   align-items: center;
   gap: 9px;
-  padding: ${({ $featured }) => ($featured ? "12px" : "10px")};
-  border: 1px solid
-    ${({ $isDark }) => ($isDark ? "#34413A" : "#E0E9E3")};
-  border-radius: ${({ $featured }) => ($featured ? "14px" : "13px")};
+  padding: ${({ $featured }) => ($featured ? "15px" : "10px")};
+  border: 0;
+  border-radius: ${({ $featured }) => ($featured ? "20px" : "15px")};
   background: ${({ $isDark }) => ($isDark ? "#1D2521" : "#FFFEFA")};
   color: ${({ $isDark }) => ($isDark ? "#E7ECE9" : "#315245")};
   text-align: left;
-  box-shadow: none;
+  box-shadow: ${({ $featured, $isDark }) =>
+    $featured && !$isDark
+      ? "0 8px 22px rgba(70, 91, 80, 0.055)"
+      : "none"};
   cursor: pointer;
   transition:
     border-color 160ms ease,
@@ -421,14 +506,39 @@ export const QuickActionButton = styled.button`
     transform 160ms ease;
 
   > span {
-    width: ${({ $featured }) => ($featured ? "38px" : "32px")};
-    height: ${({ $featured }) => ($featured ? "38px" : "32px")};
-    flex: 0 0 ${({ $featured }) => ($featured ? "38px" : "32px")};
+    width: ${({ $featured }) => ($featured ? "42px" : "32px")};
+    height: ${({ $featured }) => ($featured ? "42px" : "32px")};
+    flex: 0 0 ${({ $featured }) => ($featured ? "42px" : "32px")};
     display: grid;
     place-items: center;
-    border-radius: 10px;
+    border-radius: 14px;
     background: var(--porty-primary-soft);
     color: var(--porty-primary-hover);
+  }
+
+  &:nth-child(2) > span {
+    background: var(--porty-blush);
+    color: #a75c71;
+  }
+
+  &:nth-child(3) > span {
+    background: var(--porty-lavender);
+    color: #756b9b;
+  }
+
+  &:nth-child(4) > span {
+    background: var(--porty-accent-soft);
+    color: var(--porty-accent-text);
+  }
+
+  &:nth-child(5) > span {
+    background: ${({ $isDark }) => ($isDark ? "#293E48" : "#E6F2F8")};
+    color: ${({ $isDark }) => ($isDark ? "#93C4D9" : "#4E8CA8")};
+  }
+
+  &:nth-child(6) > span {
+    background: ${({ $isDark }) => ($isDark ? "#493A31" : "#FCEADF")};
+    color: ${({ $isDark }) => ($isDark ? "#E5B492" : "#B66F48")};
   }
 
   > div {
@@ -453,12 +563,13 @@ export const QuickActionButton = styled.button`
   }
 
   &:hover {
-    border-color: var(--porty-primary);
-    background: ${({ $isDark }) => ($isDark ? "#223A2F" : "#F7FBF8")};
+    background: ${({ $isDark }) => ($isDark ? "#223A2F" : "#F9FBF8")};
+    transform: translateY(-2px);
   }
 
   @media (max-width: 480px) {
-    min-height: ${({ $featured }) => ($featured ? "82px" : "66px")};
+    min-height: ${({ $featured }) => ($featured ? "84px" : "66px")};
+    padding: ${({ $featured }) => ($featured ? "12px 11px" : "10px")};
 
     > div {
       width: auto;
@@ -474,12 +585,11 @@ export const QuickActionButton = styled.button`
 
 export const InputArea = styled.footer`
   flex: 0 0 auto;
-  padding: 14px 24px max(15px, env(safe-area-inset-bottom));
-  border-top: 1px solid
-    ${({ $isDark }) => ($isDark ? "#34413A" : "#E1E9E3")};
+  padding: 16px 24px max(17px, env(safe-area-inset-bottom));
+  border-top: 0;
+  border-radius: 28px 28px 0 0;
   background: ${({ $isDark }) =>
-    $isDark ? "rgba(29, 37, 33, 0.96)" : "rgba(255, 254, 250, 0.94)"};
-  backdrop-filter: blur(20px);
+    $isDark ? "#1D2521" : "#E7F5EE"};
   z-index: 25;
 
   @media (max-width: 768px) {
@@ -489,20 +599,19 @@ export const InputArea = styled.footer`
 
 export const InputWrapper = styled.div`
   width: min(100%, 820px);
-  min-height: 60px;
+  min-height: 58px;
   margin: 0 auto;
   padding: 7px 8px 7px 15px;
   display: flex;
   align-items: center;
   gap: 10px;
-  border: 1px solid
-    ${({ $isDark }) => ($isDark ? "#3A443F" : "#D6E1DC")};
-  border-radius: 16px;
-  background: ${({ $isDark }) => ($isDark ? "#252E29" : "#F7FAF7")};
-  transition: border-color 160ms ease;
+  border: 0;
+  border-radius: 22px;
+  background: ${({ $isDark }) => ($isDark ? "#252E29" : "#FFFDF9")};
+  box-shadow: ${({ $isDark }) =>
+    $isDark ? "none" : "0 7px 22px rgba(76, 105, 89, 0.08)"};
 
   &:focus-within {
-    border-color: var(--porty-primary);
     background: var(--porty-surface);
   }
 `;
@@ -538,7 +647,7 @@ export const SendButton = styled.button`
   display: grid;
   place-items: center;
   border: 0;
-  border-radius: 14px;
+  border-radius: 50%;
   background: ${({ disabled }) => (disabled ? "#B9C5BF" : palette.green)};
   color: ${({ disabled }) => (disabled ? "#66716C" : "#10251A")};
   cursor: ${({ disabled }) => (disabled ? "default" : "pointer")};
@@ -599,8 +708,7 @@ export const SplashOverlay = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  background:
-    radial-gradient(circle at 50% 38%, #fffefa 0, #eff9f3 48%, #e7f3ec 100%);
+  background: #eef8f2;
   z-index: 500;
   animation: splashFade 500ms ease forwards;
   animation-delay: 1.15s;
@@ -633,14 +741,13 @@ export const SplashBox = styled.div`
 `;
 
 export const SplashImage = styled.img`
-  width: 88px;
-  height: 88px;
+  width: 112px;
+  height: 112px;
   margin-bottom: 6px;
-  padding: 7px;
-  border: 3px solid #ffffff;
-  border-radius: 28px 28px 28px 10px;
-  background: var(--porty-accent-soft);
-  box-shadow: 0 15px 32px rgba(71, 112, 89, 0.14);
+  padding: 8px;
+  border: 0;
+  border-radius: 50%;
+  background: #fff0c8;
   object-fit: contain;
 `;
 

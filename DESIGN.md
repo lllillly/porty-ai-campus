@@ -2,35 +2,40 @@
 
 ## 1. Direction
 
-**PORTY Conversation** is a calm, practical campus assistant interface. It borrows
-the clarity of modern messenger products—bright surfaces, generous spacing,
-immediate actions, and readable conversations—without copying another service's
-logo, layout, or identity.
+**PORTY Conversation** is a friendly campus assistant built around Knung-i,
+Kongju National University's official mascot. The interface keeps the clarity
+of a messenger while using soft shapes, warm whitespace, and small pastel
+accents that feel personal rather than corporate.
 
 Design principles:
 
-- **Simple:** one primary task per screen and no decorative UI without purpose.
-- **Wide:** comfortable breathing room, 44px minimum touch targets, and an
-  820px readable conversation column.
-- **Bright:** white surfaces, a soft mint conversation canvas, and a single
-  green brand color.
-- **Trustworthy:** official links and data status are visually distinct from
-  generated answers.
+- **Conversational:** the first screen starts with Knung-i's greeting, not a
+  generic dashboard headline.
+- **Soft:** rounded speech bubbles and low-contrast pastel surfaces keep the
+  interface approachable.
+- **Practical:** common campus tasks remain visible without competing with the
+  chat input.
+- **Trustworthy:** official links and data status remain visually distinct from
+  answers.
 
 ## 2. Brand
 
-The PORTY mark is an original rounded speech bubble containing a `P` monogram
-and a small campus sparkle. It must not be replaced with the LINE logo or a
-lookalike.
+PORTY uses the official 2024 renewed Knung-i artwork distributed by Kongju
+National University. Do not redraw the mascot or change its colors, proportions,
+or details. Layout containers and backgrounds may change without altering the
+artwork itself.
 
-- Primary: `#08B86A`
-- Primary hover: `#079D5B`
-- Primary soft: `#DDF7EA`
-- Canvas: `#EEF5F2`
-- Surface: `#FFFFFF`
-- Text: `#171C1A`
-- Secondary text: `#65706B`
-- Border: `#DFE7E3`
+- Primary: `#78D6AD`
+- Primary hover: `#348F6B`
+- Primary soft: `#E4F8EF`
+- Blush: `#F8DFE6`
+- Lavender: `#EEEAF8`
+- Butter: `#FFF3CF`
+- Canvas: `#FAF9F5`
+- Surface: `#FFFDF9`
+- Text: `#26352F`
+- Secondary text: `#737D78`
+- Border: `#E6E8E2`
 - Error: `#E5484D`
 - Warning surface: `#FFF5D6`
 
@@ -45,9 +50,9 @@ Dark mode:
 
 ## 3. Typography
 
-Use the system Korean sans-serif stack:
+Use Pretendard Variable as the primary webfont:
 
-`Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Segoe UI", sans-serif`
+`"Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif`
 
 - Display: 24px / 700
 - Section heading: 17px / 700
@@ -58,20 +63,19 @@ Use the system Korean sans-serif stack:
 
 ## 4. Shape and Elevation
 
-- Message bubble: 18px, with the speaker-side corner reduced to 6px.
-- Card: 18px.
-- Input and pill: full radius (`999px`).
-- Modal: 24px desktop, 24px top corners on mobile.
-- Use a 1px border before adding shadow.
-- Default shadow: `0 12px 32px rgba(28, 54, 42, 0.08)`.
+- Message bubble: 20px, with the speaker-side corner reduced to 7px.
+- Shortcut card: 20px.
+- Input: 22px with a circular send button.
+- Modal: 28px desktop, 24px top corners on mobile.
+- Prefer tonal surfaces over visible borders.
+- Default shadow: `0 16px 38px rgba(72, 91, 81, 0.08)`.
 
 ## 5. Conversation Patterns
 
-- Assistant messages use a white surface and the PORTY avatar.
+- Assistant messages use a soft lavender surface and the Knung-i avatar.
 - User messages use the primary green with near-black text for contrast.
-- Quick actions appear below the assistant message as outlined pills.
-- The composer stays visually separate from the transcript and has a clear,
-  filled send action.
+- The welcome screen pairs a Knung-i greeting scene with pastel shortcut cards.
+- The composer sits on a soft mint tray inspired by the original PORTY layout.
 - Loading states use plain language and a rotating icon; they do not imitate a
   completed response.
 
@@ -99,4 +103,3 @@ Use the system Korean sans-serif stack:
   canvas fills the remaining space.
 - Horizontal action lists may scroll; important actions must not shrink below
   their readable width.
-

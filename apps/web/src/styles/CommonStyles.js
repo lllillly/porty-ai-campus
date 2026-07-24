@@ -4,10 +4,10 @@ export const CommonCard = styled.article`
   width: min(calc(100% - 48px), 390px);
   margin: 2px 0 2px 48px;
   padding: 18px;
-  border: 1px solid var(--porty-border);
-  border-radius: 16px;
+  border: 0;
+  border-radius: 22px;
   background: var(--porty-surface);
-  box-shadow: 0 2px 10px rgba(54, 91, 72, 0.06);
+  box-shadow: var(--porty-shadow);
   color: var(--porty-text);
 
   @media (max-width: 480px) {
@@ -21,7 +21,7 @@ export const PrimaryButton = styled.button`
   min-height: 44px;
   padding: 10px 16px;
   border: 0;
-  border-radius: 13px;
+  border-radius: 16px;
   background: var(--porty-primary);
   color: #173c2d;
   font-size: 14px;
@@ -46,8 +46,8 @@ export const PrimaryButton = styled.button`
 
 export const BackButton = styled(PrimaryButton)`
   margin-top: 10px;
-  border: 1px solid var(--porty-border);
-  background: var(--porty-surface);
+  border: 0;
+  background: var(--porty-surface-soft);
   color: var(--porty-subtext);
 
   &:hover {
