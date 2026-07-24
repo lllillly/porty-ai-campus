@@ -71,19 +71,19 @@ export const BrandButton = styled.button`
 `;
 
 export const Logo = styled.img`
-  width: 50px;
-  height: 50px;
-  flex: 0 0 50px;
-  padding: 4px;
+  width: 38px;
+  height: 56px;
+  flex: 0 0 38px;
+  padding: 0;
   border: 0;
-  border-radius: 50%;
-  background: ${({ $isDark }) => ($isDark ? "#443A22" : "#FFF0C8")};
+  border-radius: 0;
+  background: transparent;
   object-fit: contain;
 
   @media (max-width: 768px) {
-    width: 46px;
-    height: 46px;
-    flex-basis: 46px;
+    width: 34px;
+    height: 50px;
+    flex-basis: 34px;
   }
 `;
 
@@ -361,14 +361,14 @@ export const MessageWrapper = styled.div`
 `;
 
 export const AvatarWrapper = styled.div`
-  width: 44px;
-  height: 44px;
-  flex: 0 0 44px;
-  padding: 3px;
-  overflow: hidden;
+  width: 32px;
+  height: 48px;
+  flex: 0 0 32px;
+  padding: 0;
+  overflow: visible;
   border: 0;
-  border-radius: 50%;
-  background: var(--porty-accent-soft);
+  border-radius: 0;
+  background: transparent;
 
   img {
     width: 100%;
@@ -745,13 +745,13 @@ export const SplashBox = styled.div`
 `;
 
 export const SplashImage = styled.img`
-  width: 112px;
-  height: 112px;
-  margin-bottom: 6px;
-  padding: 8px;
+  width: 88px;
+  height: 142px;
+  margin-bottom: 4px;
+  padding: 0;
   border: 0;
-  border-radius: 50%;
-  background: #fff0c8;
+  border-radius: 0;
+  background: transparent;
   object-fit: contain;
 `;
 
