@@ -467,13 +467,22 @@ def test_current_shuttle_question_returns_period_routes_and_times():
     payload = response.json()
     assert payload["mode"] == "structured"
     assert "2학기" in payload["response"]
-    assert "유성 → 공주" in payload["response"]
-    assert "07:50" in payload["response"]
+    assert "천안 시내" in payload["response"]
+    assert "08:00~09:30" in payload["response"]
     assert payload["presentation"]["type"] == "shuttle"
+    assert payload["presentation"]["view"] == "circulation"
     assert payload["presentation"]["status"] == "방학 · 운행 예정"
-    assert len(payload["presentation"]["routes"]) == 6
-    assert payload["presentation"]["routes"][0]["trips"][0]["departure"] == "07:50"
-    assert payload["sources"][0]["source_url"].endswith("/16872/subview.do")
+    assert payload["presentation"]["selectedGroup"] == "cheonan"
+    assert len(payload["presentation"]["groups"]) == 3
+    first_table = payload["presentation"]["groups"][0]["tables"][0]
+    assert first_table["name"] == "천안캠퍼스↔시내 순환(등교시)"
+    assert first_table["rows"][0]["times"] == [
+        "08:00",
+        "08:10",
+        "08:15",
+        "08:20",
+    ]
+    assert payload["presentation"]["sourceUrl"].endswith("/16880/subview.do")
 
 
 def test_directional_shuttle_question_returns_only_requested_direction():

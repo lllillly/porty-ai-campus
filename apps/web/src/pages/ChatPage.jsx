@@ -89,6 +89,7 @@ const ChatPage = () => {
   const [toastMessage, setToastMessage] = useState("");
 
   const chatBodyRef = useRef(null);
+  const lastChatRef = useRef(null);
   const chatsRef = useRef(chats);
 
   const showToast = (msg) => {
@@ -129,12 +130,19 @@ const ChatPage = () => {
   }, []);
 
   useEffect(() => {
-    if (chatBodyRef.current) {
-      chatBodyRef.current.scrollTo({
-        top: chatBodyRef.current.scrollHeight,
-        behavior: "smooth",
-      });
-    }
+    const body = chatBodyRef.current;
+    const latest = lastChatRef.current;
+    if (!body || !latest) return;
+
+    const bodyTop = body.getBoundingClientRect().top;
+    const latestTop = latest.getBoundingClientRect().top;
+    body.scrollTo({
+      top:
+        chats.length <= 1
+          ? 0
+          : Math.max(0, body.scrollTop + latestTop - bodyTop - 12),
+      behavior: "smooth",
+    });
   }, [chats]);
 
   useEffect(() => {
@@ -320,7 +328,7 @@ const ChatPage = () => {
 
       <ChatBody ref={chatBodyRef} $isDark={isDarkMode}>
         {chats.map((c, idx) => (
-          <div key={idx}>
+          <div key={idx} ref={idx === chats.length - 1 ? lastChatRef : null}>
             {c.showWelcome ? (
               <WelcomeIntro
                 onActionClick={sendMessage}

@@ -28,12 +28,56 @@ describe("ShuttleCard", () => {
       />,
     );
 
-    expect(markup).toContain("무료 셔틀버스");
+    expect(markup).toContain("무료버스 시간표");
     expect(markup).toContain("운행 중");
     expect(markup).toContain("천안");
     expect(markup).toContain("공주");
     expect(markup).toContain("07:40");
     expect(markup).toContain("08:40");
-    expect(markup).toContain("정류장별 공식 시간표");
+    expect(markup).toContain("공식 시간표 확인");
+  });
+
+  it("renders circulation stops and times as an accessible timetable", () => {
+    const markup = renderToStaticMarkup(
+      <ShuttleCard
+        data={{
+          type: "shuttle",
+          view: "circulation",
+          status: "운행 중",
+          selectedGroup: "cheonan",
+          groups: [
+            {
+              id: "cheonan",
+              label: "천안 시내",
+              tables: [
+                {
+                  name: "천안캠퍼스↔시내 순환(등교시)",
+                  columns: [
+                    "천안캠퍼스",
+                    "시외버스터미널(백제약국앞)",
+                    "두정역(공단육교승강장)",
+                    "천안캠퍼스",
+                  ],
+                  rows: [
+                    {
+                      id: 1,
+                      times: ["08:00", "08:10", "08:15", "08:20"],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          sourceUrl: "https://example.com/circulation",
+        }}
+        onBackToMain={() => {}}
+      />,
+    );
+
+    expect(markup).toContain("순환버스 시간표");
+    expect(markup).toContain("천안 시내");
+    expect(markup).toContain("등교 순환");
+    expect(markup).toContain("시외버스터미널");
+    expect(markup).toContain("08:20");
   });
 });

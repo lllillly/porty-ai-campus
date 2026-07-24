@@ -77,9 +77,9 @@ export const Logo = styled.img`
   padding: 2px;
   border: 2px solid
     ${({ $isDark }) => ($isDark ? "#405047" : "#FFFFFF")};
-  border-radius: 17px 17px 17px 7px;
+  border-radius: 14px;
   background: ${({ $isDark }) => ($isDark ? "#2A352F" : "#FFF3CF")};
-  box-shadow: 0 8px 18px rgba(90, 116, 98, 0.14);
+  box-shadow: none;
   object-fit: contain;
 
   @media (max-width: 768px) {
@@ -135,7 +135,7 @@ const HeaderIconButton = styled.button`
   place-items: center;
   border: 1px solid
     ${({ $isDark }) => ($isDark ? "#34413A" : "#E3ECE6")};
-  border-radius: 14px;
+  border-radius: 12px;
   background: ${({ $isDark }) => ($isDark ? "#252E29" : "#F7FAF7")};
   color: ${({ $isDark }) => ($isDark ? "#D8DEDB" : "#4F5C56")};
   cursor: pointer;
@@ -166,32 +166,7 @@ export const ChatBody = styled.section`
   display: flex;
   flex-direction: column;
   gap: 18px;
-  background:
-    radial-gradient(
-      circle at 12% 2%,
-      ${({ $isDark }) =>
-          $isDark ? "rgba(105, 207, 164, 0.08)" : "rgba(228, 248, 239, 0.9)"}
-        0 80px,
-      transparent 260px
-    ),
-    radial-gradient(
-      circle at 88% 12%,
-      ${({ $isDark }) =>
-          $isDark ? "rgba(229, 189, 94, 0.06)" : "rgba(255, 243, 207, 0.8)"}
-        0 55px,
-      transparent 220px
-    ),
-    radial-gradient(
-      circle,
-      ${({ $isDark }) => ($isDark ? "#26312B" : "#DDE9E1")} 1px,
-      transparent 1px
-    ),
-    ${({ $isDark }) => ($isDark ? "#141A17" : palette.canvas)};
-  background-size:
-    auto,
-    auto,
-    22px 22px,
-    auto;
+  background: ${({ $isDark }) => ($isDark ? "#141A17" : "#F6F8F6")};
 
   > div {
     width: min(100%, 820px);
@@ -220,116 +195,71 @@ export const ChatBody = styled.section`
 `;
 
 export const WelcomeCard = styled.section`
-  width: min(100%, 760px);
+  width: min(100%, 720px);
   margin: 0 auto;
-  padding: 12px 0 28px;
+  padding: 18px 0 28px;
 `;
 
 export const WelcomeCopy = styled.div`
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: clamp(24px, 5vw, 52px);
-  margin-bottom: 38px;
+  gap: 20px;
+  margin-bottom: 32px;
 
   @media (max-width: 620px) {
-    flex-direction: column;
-    gap: 20px;
-    margin-bottom: 30px;
-    text-align: center;
+    gap: 14px;
+    margin-bottom: 26px;
   }
 `;
 
 export const WelcomeCharacter = styled.div`
-  width: 132px;
-  height: 132px;
-  position: relative;
-  flex: 0 0 132px;
+  width: 88px;
+  height: 88px;
+  flex: 0 0 88px;
   display: grid;
   place-items: center;
-  border: 1px solid color-mix(in srgb, var(--porty-accent) 68%, white);
-  border-radius: 44px 44px 44px 18px;
-  background:
-    radial-gradient(circle at 30% 20%, #fffefa 0 7%, transparent 8%),
-    var(--porty-accent-soft);
-  box-shadow:
-    0 0 0 10px color-mix(in srgb, var(--porty-accent-soft) 52%, transparent),
-    0 22px 50px rgba(101, 91, 46, 0.14);
-  transform: rotate(-2deg);
+  border: 1px solid var(--porty-border);
+  border-radius: 24px;
+  background: var(--porty-accent-soft);
 
   img {
-    width: 105px;
-    height: 105px;
+    width: 72px;
+    height: 72px;
     object-fit: contain;
-    transform: rotate(2deg);
-  }
-
-  > span {
-    width: 36px;
-    height: 36px;
-    position: absolute;
-    top: -12px;
-    right: -10px;
-    display: grid;
-    place-items: center;
-    border: 3px solid var(--porty-canvas);
-    border-radius: 13px;
-    background: var(--porty-primary);
-    color: #173c2d;
-    transform: rotate(8deg);
-    z-index: 1;
   }
 
   @media (max-width: 620px) {
-    width: 108px;
-    height: 108px;
-    flex-basis: 108px;
-    border-radius: 36px 36px 36px 14px;
+    width: 68px;
+    height: 68px;
+    flex-basis: 68px;
+    border-radius: 19px;
 
     img {
-      width: 86px;
-      height: 86px;
+      width: 56px;
+      height: 56px;
     }
-  }
-`;
-
-export const WelcomeEyebrow = styled.p`
-  margin: 0 0 9px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--porty-primary-hover);
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-
-  span {
-    width: 18px;
-    height: 2px;
-    border-radius: 999px;
-    background: var(--porty-primary);
-  }
-
-  @media (max-width: 620px) {
-    justify-content: center;
   }
 `;
 
 export const WelcomeTitle = styled.h1`
   margin: 0;
   color: var(--porty-text);
-  font-size: clamp(29px, 3.4vw, 40px);
-  font-weight: 850;
-  letter-spacing: -0.055em;
-  line-height: 1.18;
+  font-size: clamp(25px, 3vw, 32px);
+  font-weight: 780;
+  letter-spacing: -0.045em;
+  line-height: 1.25;
 `;
 
 export const WelcomeDescription = styled.p`
-  margin: 13px 0 0;
+  margin: 8px 0 0;
   color: var(--porty-subtext);
-  font-size: 14px;
-  font-weight: 520;
+  font-size: 13px;
+  font-weight: 450;
   line-height: 1.55;
+
+  @media (max-width: 520px) {
+    font-size: 12px;
+  }
 `;
 
 export const WelcomePrompt = styled.p`
@@ -353,9 +283,9 @@ export const AvatarWrapper = styled.div`
   padding: 2px;
   overflow: hidden;
   border: 2px solid ${({ $isDark }) => ($isDark ? "#34413A" : "#FFFFFF")};
-  border-radius: 15px 15px 15px 5px;
+  border-radius: 12px;
   background: var(--porty-accent-soft);
-  box-shadow: 0 6px 16px rgba(74, 107, 89, 0.12);
+  box-shadow: none;
 
   img {
     width: 100%;
@@ -371,8 +301,7 @@ export const MessageBubble = styled.div`
   border: 1px solid
     ${({ $isDark, $isUser }) =>
       $isUser ? "rgba(87, 164, 128, 0.12)" : $isDark ? "#34413A" : "#E1EAE4"};
-  border-radius: ${({ $isUser }) =>
-    $isUser ? "19px 7px 19px 19px" : "7px 19px 19px 19px"};
+  border-radius: 16px;
   background: ${({ $isDark, $isUser }) =>
     $isUser
       ? $isDark
@@ -381,12 +310,7 @@ export const MessageBubble = styled.div`
       : $isDark
         ? "#1D2521"
         : "#FFFEFA"};
-  box-shadow: ${({ $isUser, $isDark }) =>
-    $isDark
-      ? "none"
-      : $isUser
-        ? "0 6px 16px rgba(57, 126, 91, 0.08)"
-        : "0 9px 25px rgba(54, 91, 72, 0.08)"};
+  box-shadow: none;
   color: ${({ $isDark, $isUser }) =>
     $isUser ? ($isDark ? "#F2FFF8" : "#214636") : $isDark ? "#F5F7F6" : palette.text};
   font-size: 14px;
@@ -468,7 +392,7 @@ export const QuickActionsWrapper = styled.div`
     $featured
       ? "repeat(3, minmax(0, 1fr))"
       : "repeat(3, minmax(0, 1fr))"};
-  gap: ${({ $featured }) => ($featured ? "11px" : "8px")};
+  gap: ${({ $featured }) => ($featured ? "9px" : "8px")};
 
   @media (max-width: 620px) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -477,21 +401,19 @@ export const QuickActionsWrapper = styled.div`
 
 export const QuickActionButton = styled.button`
   min-width: 0;
-  min-height: ${({ $featured }) => ($featured ? "86px" : "66px")};
+  min-height: ${({ $featured }) => ($featured ? "78px" : "66px")};
   position: relative;
   display: flex;
   align-items: center;
   gap: 9px;
-  padding: ${({ $featured }) => ($featured ? "14px 13px" : "10px")};
+  padding: ${({ $featured }) => ($featured ? "12px" : "10px")};
   border: 1px solid
     ${({ $isDark }) => ($isDark ? "#34413A" : "#E0E9E3")};
-  border-radius: ${({ $featured }) =>
-    $featured ? "19px 19px 19px 8px" : "16px 16px 16px 6px"};
+  border-radius: ${({ $featured }) => ($featured ? "14px" : "13px")};
   background: ${({ $isDark }) => ($isDark ? "#1D2521" : "#FFFEFA")};
   color: ${({ $isDark }) => ($isDark ? "#E7ECE9" : "#315245")};
   text-align: left;
-  box-shadow: ${({ $featured, $isDark }) =>
-    $featured && !$isDark ? "0 10px 28px rgba(54, 91, 72, 0.07)" : "none"};
+  box-shadow: none;
   cursor: pointer;
   transition:
     border-color 160ms ease,
@@ -504,25 +426,9 @@ export const QuickActionButton = styled.button`
     flex: 0 0 ${({ $featured }) => ($featured ? "38px" : "32px")};
     display: grid;
     place-items: center;
-    border-radius: 11px;
-    background: ${({ $tone }) =>
-      ({
-        mint: "#E3F8EF",
-        yellow: "#FFF3CF",
-        blue: "#E7F2FF",
-        purple: "#F1EAFF",
-        coral: "#FFEBE5",
-        green: "#EAF6DF",
-      })[$tone] || "var(--porty-primary-soft)"};
-    color: ${({ $tone }) =>
-      ({
-        mint: "#24815F",
-        yellow: "#9B6811",
-        blue: "#397BB4",
-        purple: "#7854AD",
-        coral: "#B76049",
-        green: "#5D862D",
-      })[$tone] || "var(--porty-primary-hover)"};
+    border-radius: 10px;
+    background: var(--porty-primary-soft);
+    color: var(--porty-primary-hover);
   }
 
   > div {
@@ -546,31 +452,16 @@ export const QuickActionButton = styled.button`
     white-space: nowrap;
   }
 
-  .action-arrow {
-    margin-left: auto;
-    flex: 0 0 auto;
-    color: var(--porty-subtext);
-    opacity: 0.68;
-  }
-
   &:hover {
     border-color: var(--porty-primary);
-    background: ${({ $isDark }) => ($isDark ? "#223A2F" : palette.mint)};
-    transform: translateY(-1px);
-
-    .action-arrow {
-      color: var(--porty-primary-hover);
-      opacity: 1;
-    }
+    background: ${({ $isDark }) => ($isDark ? "#223A2F" : "#F7FBF8")};
   }
 
   @media (max-width: 480px) {
-    min-height: ${({ $featured }) => ($featured ? "98px" : "66px")};
-    align-items: flex-start;
-    flex-wrap: wrap;
+    min-height: ${({ $featured }) => ($featured ? "82px" : "66px")};
 
     > div {
-      width: ${({ $featured }) => ($featured ? "calc(100% - 48px)" : "auto")};
+      width: auto;
     }
 
     small {
@@ -578,11 +469,6 @@ export const QuickActionButton = styled.button`
       line-height: 1.35;
     }
 
-    .action-arrow {
-      position: absolute;
-      right: 10px;
-      top: 14px;
-    }
   }
 `;
 
@@ -611,9 +497,9 @@ export const InputWrapper = styled.div`
   gap: 10px;
   border: 1px solid
     ${({ $isDark }) => ($isDark ? "#3A443F" : "#D6E1DC")};
-  border-radius: 21px;
+  border-radius: 16px;
   background: ${({ $isDark }) => ($isDark ? "#252E29" : "#F7FAF7")};
-  box-shadow: 0 9px 26px rgba(54, 91, 72, 0.07);
+  box-shadow: none;
   transition:
     border-color 160ms ease,
     box-shadow 160ms ease;

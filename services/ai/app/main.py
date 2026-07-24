@@ -82,14 +82,7 @@ AMBIGUOUS_CAMPUS_FACILITIES = (
 )
 KOREA_TIMEZONE = ZoneInfo("Asia/Seoul")
 SHUTTLE_SOURCE_URL = "https://www.kongju.ac.kr/KNU/16872/subview.do"
-SHUTTLE_ROUTE_SUMMARY = (
-    {"name": "유성 → 공주", "departures": ("07:50", "09:10")},
-    {"name": "세종 → 공주", "departures": ("08:00", "09:00")},
-    {"name": "천안 → 공주", "departures": ("07:40",)},
-    {"name": "청주 → 공주", "departures": ("07:30",)},
-    {"name": "대전 → 천안", "departures": ("07:30",)},
-    {"name": "대전 → 예산", "departures": ("07:40",), "note": "월요일"},
-)
+CIRCULATION_SOURCE_URL = "https://www.kongju.ac.kr/KNU/16880/subview.do"
 MEAL_SOURCE_URL = "https://www.kongju.ac.kr/KNU/16863/subview.do"
 STUDENT_NEWS_URL_PATTERN = re.compile(
     r"https://www\.kongju\.ac\.kr/bbs/KNU/2132/\d+/artclView\.do"
@@ -846,53 +839,119 @@ def shuttle_response(message: str) -> QueryResponse | None:
         reference_date="2026-07-24",
     )
 
-    if is_general_question:
-        lines = [service_status, "", "주요 등교 노선과 출발 시간은 다음과 같습니다."]
-        lines.extend(
+    wants_circulation = "순환" in message
+    if is_general_question or wants_circulation:
+        route_by_name = {
+            str(route.get("route")): route
+            for route in routes
+        }
+
+        def timetable_presentation(route_name: str) -> dict[str, Any] | None:
+            route = route_by_name.get(route_name)
+            if not route:
+                return None
+            stops = [str(stop) for stop in route.get("stops", []) if stop]
+            rows = []
+            for index, timetable in enumerate(route.get("timetable", []), start=1):
+                times = []
+                for stop_index, stop in enumerate(stops):
+                    value = timetable.get(stop)
+                    if stop_index == 0 and not value:
+                        value = timetable.get("departure_time")
+                    if stop_index == len(stops) - 1 and not value:
+                        value = timetable.get("arrival_time")
+                    times.append(value or "–")
+                rows.append(
+                    {
+                        "id": index,
+                        "vehicle": timetable.get("vehicle"),
+                        "times": times,
+                    }
+                )
+            return {
+                "name": route_name,
+                "columns": stops,
+                "rows": rows,
+            }
+
+        group_specs = (
             (
-                f"- {route['name']}: "
-                f"{'·'.join(route['departures'])} 출발"
-                + (f" ({route['note']})" if route.get("note") else "")
-            )
-            for route in SHUTTLE_ROUTE_SUMMARY
+                "cheonan",
+                "천안 시내",
+                (
+                    "천안캠퍼스↔시내 순환(등교시)",
+                    "천안캠퍼스↔시내 순환(하교시)",
+                ),
+            ),
+            (
+                "campus",
+                "캠퍼스 간",
+                (
+                    "공주→천안",
+                    "천안→공주",
+                    "공주→예산",
+                    "예산→공주",
+                ),
+            ),
+            (
+                "yesan",
+                "예산·신창",
+                ("예산캠퍼스↔신창역 순환",),
+            ),
         )
-        lines.extend(
-            [
-                "- 캠퍼스 순환: 공주↔천안, 공주↔예산, 예산↔신창역",
-                "",
-                "공휴일·주말·개교기념일에는 운행하지 않습니다.",
-                f"[정류장별 공식 시간표]({SHUTTLE_SOURCE_URL})",
+        groups = []
+        for group_id, label, route_names in group_specs:
+            tables = [
+                table
+                for route_name in route_names
+                if (table := timetable_presentation(route_name))
             ]
-        )
+            if tables:
+                groups.append(
+                    {
+                        "id": group_id,
+                        "label": label,
+                        "tables": tables,
+                    }
+                )
+
+        selected_group = "cheonan"
+        if "신창" in message or ("예산" in message and "공주" not in message):
+            selected_group = "yesan"
+        elif (
+            ("공주" in message and any(place in message for place in ("천안", "예산")))
+            or "캠퍼스 간" in message
+        ):
+            selected_group = "campus"
+
+        lines = [
+            service_status,
+            "",
+            "순환버스 시간표를 먼저 보여드릴게요.",
+            "- 천안 시내: 등교 08:00~09:30 · 하교 15:30~18:00",
+            "- 캠퍼스 간: 공주↔천안 · 공주↔예산",
+            "- 예산 순환: 예산캠퍼스↔신창역",
+            "",
+            "공휴일·주말·개교기념일에는 운행하지 않습니다.",
+            f"[순환버스 공식 시간표]({CIRCULATION_SOURCE_URL})",
+        ]
         return QueryResponse(
             response="\n".join(lines),
             sources=[source],
             presentation={
                 "type": "shuttle",
+                "view": "circulation",
                 "status": status_label,
                 "tone": status_tone,
                 "description": service_status,
                 "period": period_label,
-                "routes": [
-                    {
-                        "name": route["name"],
-                        "trips": [
-                            {
-                                "departure": departure,
-                                "note": route.get("note"),
-                            }
-                            for departure in route["departures"]
-                        ],
-                    }
-                    for route in SHUTTLE_ROUTE_SUMMARY
-                ],
-                "circulation": (
-                    "공주↔천안 · 공주↔예산 · 예산↔신창역"
-                ),
+                "groups": groups,
+                "selectedGroup": selected_group,
+                "routes": [],
                 "notice": (
                     "공휴일·주말·개교기념일에는 운행하지 않습니다."
                 ),
-                "sourceUrl": SHUTTLE_SOURCE_URL,
+                "sourceUrl": CIRCULATION_SOURCE_URL,
             },
             mode="structured",
         )

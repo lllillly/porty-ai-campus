@@ -5,9 +5,9 @@ export const CommonCard = styled.article`
   margin: 2px 0 2px 48px;
   padding: 18px;
   border: 1px solid var(--porty-border);
-  border-radius: 22px 22px 22px 8px;
+  border-radius: 16px;
   background: var(--porty-surface);
-  box-shadow: var(--porty-shadow);
+  box-shadow: 0 2px 10px rgba(54, 91, 72, 0.06);
   color: var(--porty-text);
 
   @media (max-width: 480px) {
