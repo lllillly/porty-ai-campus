@@ -161,7 +161,7 @@ const CloseButton = styled.button`
   cursor: pointer;
 
   &:hover {
-    background: var(--porty-blush);
+    background: var(--porty-primary-soft);
     color: var(--porty-text);
   }
 `;
@@ -197,11 +197,11 @@ const QuestionButton = styled.button`
     transform 150ms ease;
 
   &:nth-child(3n + 2) {
-    background: color-mix(in srgb, var(--porty-lavender) 65%, var(--porty-surface));
+    background: color-mix(in srgb, var(--porty-primary-soft) 72%, var(--porty-surface));
   }
 
   &:nth-child(3n) {
-    background: color-mix(in srgb, var(--porty-blush) 55%, var(--porty-surface));
+    background: color-mix(in srgb, var(--porty-primary-soft) 46%, var(--porty-surface));
   }
 
   &:hover {

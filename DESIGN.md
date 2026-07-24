@@ -5,7 +5,7 @@
 **PORTY Conversation** is a friendly campus assistant built around Knung-i,
 Kongju National University's official mascot. The interface keeps the clarity
 of a messenger while using soft shapes, warm whitespace, and small pastel
-accents that feel personal rather than corporate.
+green accents that feel friendly without making the interface visually busy.
 
 Design principles:
 
@@ -25,19 +25,16 @@ National University. Do not redraw the mascot or change its colors, proportions,
 or details. Layout containers and backgrounds may change without altering the
 artwork itself.
 
-- Primary: `#78D6AD`
-- Primary hover: `#348F6B`
-- Primary soft: `#E4F8EF`
-- Blush: `#F8DFE6`
-- Lavender: `#EEEAF8`
-- Butter: `#FFF3CF`
-- Canvas: `#FAF9F5`
-- Surface: `#FFFDF9`
-- Text: `#26352F`
-- Secondary text: `#737D78`
-- Border: `#E6E8E2`
+- Primary: `#79C991`
+- Primary hover: `#347B4F`
+- Primary soft: `#EAF7EE`
+- Canvas: `#F7FBF8`
+- Surface: `#FFFFFF`
+- Surface soft: `#F1F8F3`
+- Text: `#203329`
+- Secondary text: `#6E7E74`
+- Border: `#DFECE3`
 - Error: `#E5484D`
-- Warning surface: `#FFF5D6`
 
 Dark mode:
 
@@ -72,10 +69,11 @@ Use Pretendard Variable as the primary webfont:
 
 ## 5. Conversation Patterns
 
-- Assistant messages use a soft lavender surface and the Knung-i avatar.
+- Assistant messages use a white surface and the Knung-i avatar.
 - User messages use the primary green with near-black text for contrast.
-- The welcome screen pairs a Knung-i greeting scene with pastel shortcut cards.
-- The composer sits on a soft mint tray inspired by the original PORTY layout.
+- The welcome screen pairs a Knung-i greeting scene with white shortcut cards
+  and tonal green icons.
+- The composer sits on a soft green tray inspired by the original PORTY layout.
 - Loading states use plain language and a rotating icon; they do not imitate a
   completed response.
 

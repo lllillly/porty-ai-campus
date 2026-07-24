@@ -116,7 +116,7 @@ const ChatPage = () => {
   }, []);
 
   useEffect(() => {
-    document.body.style.backgroundColor = isDarkMode ? "#141A17" : "#F5F8F3";
+    document.body.style.backgroundColor = isDarkMode ? "#141A17" : "#F7FBF8";
     document.documentElement.dataset.theme = isDarkMode ? "dark" : "light";
     return () => {
       document.body.style.backgroundColor = "";
@@ -249,8 +249,10 @@ const ChatPage = () => {
           >
             <Logo src="/assets/knung-icon.png" alt="" $isDark={isDarkMode} />
             <BrandCopy>
-              <BrandName $isDark={isDarkMode}>포티</BrandName>
-              <BrandStatus $isDark={isDarkMode}>공주대 생활 도우미</BrandStatus>
+              <BrandName $isDark={isDarkMode}>공주대 챗봇</BrandName>
+              <BrandStatus $isDark={isDarkMode}>
+                학교생활 정보를 빠르게 찾아드려요
+              </BrandStatus>
             </BrandCopy>
           </BrandButton>
 
@@ -262,6 +264,7 @@ const ChatPage = () => {
               aria-label="식단 설정 열기"
             >
               <Coffee size={19} />
+              <span>식단</span>
             </NotificationButton>
 
             <MenuButton
@@ -271,6 +274,7 @@ const ChatPage = () => {
               aria-label="포티 설정 열기"
             >
               <Settings size={20} />
+              <span>설정</span>
             </MenuButton>
           </HeaderActions>
         </HeaderContent>

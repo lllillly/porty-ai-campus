@@ -1,16 +1,13 @@
 import styled from "styled-components";
 
 const palette = {
-  green: "#78D6AD",
-  greenHover: "#348F6B",
-  mint: "#E4F8EF",
-  yellow: "#FFD879",
-  blush: "#F8DFE6",
-  lavender: "#EEEAF8",
-  canvas: "#FAF9F5",
-  text: "#26352F",
-  subtext: "#718079",
-  border: "#E6E8E2",
+  green: "#79C991",
+  greenHover: "#347B4F",
+  mint: "#EAF7EE",
+  canvas: "#F7FBF8",
+  text: "#203329",
+  subtext: "#6E7E74",
+  border: "#DFECE3",
 };
 
 export const ChatContainer = styled.main`
@@ -27,18 +24,18 @@ export const ChatContainer = styled.main`
 `;
 
 export const Header = styled.header`
-  flex: 0 0 72px;
+  flex: 0 0 78px;
   display: flex;
   align-items: center;
   background: ${({ $isDark }) =>
-    $isDark ? "rgba(29, 37, 33, 0.96)" : "rgba(255, 253, 249, 0.96)"};
+    $isDark ? "rgba(29, 37, 33, 0.97)" : "rgba(255, 255, 255, 0.97)"};
   border-bottom: 1px solid
-    ${({ $isDark }) => ($isDark ? "#34413A" : "#ECECE5")};
+    ${({ $isDark }) => ($isDark ? "#34413A" : palette.border)};
   backdrop-filter: blur(16px);
   z-index: 30;
 
   @media (max-width: 768px) {
-    flex-basis: 66px;
+    flex-basis: 70px;
   }
 `;
 
@@ -61,13 +58,19 @@ export const BrandButton = styled.button`
   min-width: 0;
   display: flex;
   align-items: center;
-  gap: 11px;
-  padding: 0;
+  gap: 12px;
+  padding: 5px 12px 5px 8px;
   border: 0;
+  border-radius: 18px;
   background: transparent;
   color: inherit;
   cursor: pointer;
   text-align: left;
+  transition: background 160ms ease;
+
+  &:hover {
+    background: ${({ $isDark }) => ($isDark ? "#213C31" : palette.mint)};
+  }
 `;
 
 export const Logo = styled.img`
@@ -95,43 +98,63 @@ export const BrandCopy = styled.span`
 
 export const BrandName = styled.strong`
   color: ${({ $isDark }) => ($isDark ? "#F5F7F6" : palette.text)};
-  font-size: 19px;
+  font-size: 17px;
   font-weight: 800;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.035em;
   line-height: 1.15;
 `;
 
 export const BrandStatus = styled.span`
   display: block;
+  position: relative;
+  padding-left: 10px;
   color: ${({ $isDark }) => ($isDark ? "#AEB8B3" : palette.subtext)};
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 550;
   line-height: 1.2;
+
+  &::before {
+    width: 6px;
+    height: 6px;
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    border-radius: 50%;
+    background: var(--porty-primary);
+    content: "";
+  }
 `;
 
 export const HeaderActions = styled.div`
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 
   > button:first-child {
-    background: var(--porty-blush);
+    background: var(--porty-primary-soft);
   }
 
   > button:last-child {
-    background: var(--porty-primary-soft);
+    background: var(--porty-surface);
   }
 `;
 
 const HeaderIconButton = styled.button`
-  width: 44px;
+  width: auto;
   height: 44px;
-  display: grid;
-  place-items: center;
-  border: 0;
-  border-radius: 50%;
-  background: ${({ $isDark }) => ($isDark ? "#252E29" : "#F3F4EF")};
-  color: ${({ $isDark }) => ($isDark ? "#D8DEDB" : "#4F5C56")};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 13px;
+  border: 1px solid
+    ${({ $isDark }) => ($isDark ? "#34413A" : palette.border)};
+  border-radius: 14px;
+  background: ${({ $isDark }) => ($isDark ? "#252E29" : "#FFFFFF")};
+  color: ${({ $isDark }) => ($isDark ? "#D8DEDB" : "#426050")};
+  font-size: 12px;
+  font-weight: 700;
   cursor: pointer;
   transition:
     background 160ms ease,
@@ -139,12 +162,22 @@ const HeaderIconButton = styled.button`
     transform 160ms ease;
 
   &:hover {
-    background: ${({ $isDark }) => ($isDark ? "#213C31" : "#E4F8EF")};
-    color: ${({ $isDark }) => ($isDark ? "#24D184" : palette.greenHover)};
+    border-color: var(--porty-primary);
+    background: ${({ $isDark }) => ($isDark ? "#213C31" : palette.mint)};
+    color: ${({ $isDark }) => ($isDark ? "#8CE2BD" : palette.greenHover)};
   }
 
   &:active {
     transform: scale(0.96);
+  }
+
+  @media (max-width: 520px) {
+    width: 42px;
+    padding: 0;
+
+    span {
+      display: none;
+    }
   }
 `;
 
@@ -234,7 +267,7 @@ export const WelcomeCopy = styled.div`
     height: 84px;
     top: -28px;
     right: 30px;
-    background: ${({ $isDark }) => ($isDark ? "#49363E" : palette.blush)};
+    background: ${({ $isDark }) => ($isDark ? "#2B493B" : "#F8FCF9")};
   }
 
   &::after {
@@ -242,7 +275,7 @@ export const WelcomeCopy = styled.div`
     height: 48px;
     bottom: 26px;
     left: 24px;
-    background: ${({ $isDark }) => ($isDark ? "#443A22" : "#FFEAB8")};
+    background: ${({ $isDark }) => ($isDark ? "#294438" : "#CDEBD6")};
   }
 
   > div:last-child {
@@ -391,9 +424,11 @@ export const MessageBubble = styled.div`
         : "#DDF6E9"
       : $isDark
         ? "#1D2521"
-        : palette.lavender};
+        : "#FFFFFF"};
   color: ${({ $isDark, $isUser }) =>
     $isUser ? ($isDark ? "#F2FFF8" : "#214636") : $isDark ? "#F5F7F6" : palette.text};
+  box-shadow: ${({ $isDark, $isUser }) =>
+    !$isDark && !$isUser ? "0 8px 24px rgba(52, 96, 70, 0.07)" : "none"};
   font-size: 14px;
   font-weight: 450;
   line-height: 1.58;
@@ -517,28 +552,28 @@ export const QuickActionButton = styled.button`
   }
 
   &:nth-child(2) > span {
-    background: var(--porty-blush);
-    color: #a75c71;
+    background: #f0f9f2;
+    color: #4b825e;
   }
 
   &:nth-child(3) > span {
-    background: var(--porty-lavender);
-    color: #756b9b;
+    background: #e4f4e9;
+    color: #3e7651;
   }
 
   &:nth-child(4) > span {
-    background: var(--porty-accent-soft);
-    color: var(--porty-accent-text);
+    background: #edf8f0;
+    color: #558966;
   }
 
   &:nth-child(5) > span {
-    background: ${({ $isDark }) => ($isDark ? "#293E48" : "#E6F2F8")};
-    color: ${({ $isDark }) => ($isDark ? "#93C4D9" : "#4E8CA8")};
+    background: ${({ $isDark }) => ($isDark ? "#294438" : "#E6F5EA")};
+    color: ${({ $isDark }) => ($isDark ? "#A6D8B5" : "#347B4F")};
   }
 
   &:nth-child(6) > span {
-    background: ${({ $isDark }) => ($isDark ? "#493A31" : "#FCEADF")};
-    color: ${({ $isDark }) => ($isDark ? "#E5B492" : "#B66F48")};
+    background: ${({ $isDark }) => ($isDark ? "#304B3E" : "#F2FAF4")};
+    color: ${({ $isDark }) => ($isDark ? "#B8DEC3" : "#5A8B69")};
   }
 
   > div {
@@ -589,7 +624,7 @@ export const InputArea = styled.footer`
   border-top: 0;
   border-radius: 28px 28px 0 0;
   background: ${({ $isDark }) =>
-    $isDark ? "#1D2521" : "#E7F5EE"};
+    $isDark ? "#1D2521" : "#E8F6EC"};
   z-index: 25;
 
   @media (max-width: 768px) {
@@ -607,7 +642,7 @@ export const InputWrapper = styled.div`
   gap: 10px;
   border: 0;
   border-radius: 22px;
-  background: ${({ $isDark }) => ($isDark ? "#252E29" : "#FFFDF9")};
+  background: ${({ $isDark }) => ($isDark ? "#252E29" : "#FFFFFF")};
   box-shadow: ${({ $isDark }) =>
     $isDark ? "none" : "0 7px 22px rgba(76, 105, 89, 0.08)"};
 
@@ -712,7 +747,7 @@ export const SplashOverlay = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #eef8f2;
+  background: #f1f9f3;
   z-index: 500;
   animation: splashFade 500ms ease forwards;
   animation-delay: 1.15s;

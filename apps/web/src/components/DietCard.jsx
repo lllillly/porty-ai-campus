@@ -111,8 +111,9 @@ const StatusBadge = styled.span`
   flex: none;
   padding: 0.2rem 0.5rem;
   border-radius: 999px;
-  background: ${({ $active }) => ($active ? "var(--porty-primary-soft)" : "#fff5d6")};
-  color: ${({ $active }) => ($active ? "var(--porty-primary-hover)" : "#7a5810")};
+  background: var(--porty-primary-soft);
+  color: ${({ $active }) =>
+    $active ? "var(--porty-primary-hover)" : "var(--porty-subtext)"};
   font-size: 0.7rem;
   font-weight: 700;
 `;
