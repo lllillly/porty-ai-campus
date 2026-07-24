@@ -14,6 +14,7 @@ import FAQPreview from "../components/FAQPreview";
 import Toast from "../components/Toast";
 import SettingsModal from "../components/SettingsModal";
 import SplashScreen from "../components/SplashScreen";
+import { isImeKeyEvent } from "../utils/chatInput";
 import { isAcademicCalendarQuery } from "../utils/queryIntents";
 import {
   clearChatSession,
@@ -42,6 +43,8 @@ import {
   SendButton,
 } from "../styles/ChatPage.styles";
 
+const INPUT_COMPOSITION_SETTLE_MS = 24;
+
 const ChatPage = () => {
   const [message, setMessage] = useState("");
   const [sessionId] = useState(getOrCreateSessionId);
@@ -62,8 +65,11 @@ const ChatPage = () => {
   const [toastMessage, setToastMessage] = useState("");
 
   const chatBodyRef = useRef(null);
+  const inputRef = useRef(null);
   const lastChatRef = useRef(null);
   const chatsRef = useRef(chats);
+  const imeSubmitPendingRef = useRef(false);
+  const submitTimerRef = useRef(null);
   const toastTimerRef = useRef(null);
 
   const showToast = (msg) => {
@@ -76,7 +82,10 @@ const ChatPage = () => {
   };
 
   useEffect(() => {
-    return () => window.clearTimeout(toastTimerRef.current);
+    return () => {
+      window.clearTimeout(submitTimerRef.current);
+      window.clearTimeout(toastTimerRef.current);
+    };
   }, []);
 
   useEffect(() => {
@@ -125,6 +134,18 @@ const ChatPage = () => {
   }, [isDarkMode]);
 
   const appendChat = (msg) => setChats((prev) => [...prev, msg]);
+
+  const submitInput = () => {
+    sendMessage(inputRef.current?.value || "");
+  };
+
+  const scheduleInputSubmit = () => {
+    window.clearTimeout(submitTimerRef.current);
+    submitTimerRef.current = window.setTimeout(
+      submitInput,
+      INPUT_COMPOSITION_SETTLE_MS,
+    );
+  };
 
   const sendMessage = async (rawText = message) => {
     if (loading) return;
@@ -326,16 +347,32 @@ const ChatPage = () => {
             <Search size={18} />
           </InputIcon>
           <StyledInput
+            ref={inputRef}
             $isDark={isDarkMode}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onFocus={() => setShowFAQ(true)}
+            onCompositionStart={() => {
+              imeSubmitPendingRef.current = false;
+            }}
+            onCompositionEnd={() => {
+              if (!imeSubmitPendingRef.current) return;
+              imeSubmitPendingRef.current = false;
+              scheduleInputSubmit();
+            }}
             onKeyDown={(e) => {
               if (e.key === "Escape") {
                 setShowFAQ(false);
                 return;
               }
-              if (e.key === "Enter") sendMessage();
+              if (e.key !== "Enter") return;
+
+              e.preventDefault();
+              if (isImeKeyEvent(e.nativeEvent)) {
+                imeSubmitPendingRef.current = true;
+                return;
+              }
+              submitInput();
             }}
             placeholder="궁금한 학교생활을 물어보세요"
             aria-expanded={showFAQ}
@@ -345,7 +382,7 @@ const ChatPage = () => {
           <SendButton
             $loading={loading}
             disabled={loading || !message.trim()}
-            onClick={() => sendMessage()}
+            onClick={submitInput}
             aria-label={loading ? "답변 작성 중" : "메시지 보내기"}
           >
             {loading ? <Loader size={20} /> : <Send size={20} />}
