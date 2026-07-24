@@ -42,6 +42,35 @@
 | 데이터 | 공주대학교 공식 홈페이지 및 생활관 페이지 |
 | 검증 | Vitest 23개, Pytest 63개 |
 
+## 서비스 화면
+
+<p align="center">
+  <img src="./docs/screenshots/01-home.png" alt="포티 첫 화면과 자주 찾는 메뉴" />
+</p>
+
+<p align="center"><sub>크눙이와 자주 찾는 학교생활 메뉴를 한 화면에 배치했습니다.</sub></p>
+
+<table>
+  <tr>
+    <td width="50%">
+      <img src="./docs/screenshots/02-question-preview.png" alt="채팅 입력창의 추천 질문" />
+    </td>
+    <td width="50%">
+      <img src="./docs/screenshots/03-calendar.png" alt="월별 공주대학교 학사일정 캘린더" />
+    </td>
+  </tr>
+  <tr>
+    <td align="center"><sub>입력 내용에 맞춰 바로 선택할 수 있는 추천 질문</sub></td>
+    <td align="center"><sub>공식 일정을 날짜별로 확인하는 월간 캘린더</sub></td>
+  </tr>
+</table>
+
+<p align="center">
+  <img src="./docs/screenshots/04-shuttle.png" alt="천안캠퍼스 순환버스 시간표" />
+</p>
+
+<p align="center"><sub>노선과 운행 상태를 함께 보여주는 반응형 순환버스 시간표입니다.</sub></p>
+
 ## 해결하고 싶었던 문제
 
 | 문제 | PORTY의 해결 방식 |
