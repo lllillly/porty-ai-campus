@@ -103,7 +103,11 @@ def extractive_answer(hit: SearchHit, question: str | None = None) -> str:
         and not line.strip().startswith(("http://", "https://"))
     ]
 
-    if question and lines:
+    if not lines:
+        return "질문과 관련된 내용을 자료에서 찾지 못했습니다."
+
+    ranked_indices: list[int] = []
+    if question:
         query_words = set(expanded_query_words(question))
         scored = [
             (
@@ -112,26 +116,32 @@ def extractive_answer(hit: SearchHit, question: str | None = None) -> str:
             )
             for index, line in enumerate(lines)
         ]
-        matching_indices = [
+        ranked_indices = [
             index
             for score, index in sorted(
                 scored,
                 key=lambda item: (-item[0], item[1]),
             )
             if score > 0
-        ][:1]
-        selected = set(matching_indices)
-        for index in matching_indices:
-            if index + 1 < len(lines):
-                selected.add(index + 1)
-        if selected:
-            lines = [lines[index] for index in sorted(selected)]
+        ]
 
-    lines = lines[:5]
-    summary = "\n".join(f"- {line}" for line in lines)
-    reference = (
-        f"\n\n_자료 기준일: {hit.reference_date}_"
-        if hit.reference_date
-        else ""
-    )
-    return f"**{hit.title}** 관련 공식 자료예요.\n\n{summary}{reference}"
+    # The fallback must still answer like an assistant, not like a search
+    # result. Lead with the most relevant factual sentence, then keep the
+    # remaining conditions and steps instead of dropping them.
+    # Curated documents are written answer-first. Keeping the first sentence as
+    # the lead prevents a highly repeated query word in a caveat from moving
+    # "확인해 주세요" above the actual answer.
+    selected_indices = [0]
+    for index in [0, *ranked_indices, *range(len(lines))]:
+        if index not in selected_indices:
+            selected_indices.append(index)
+        if len(selected_indices) >= 5:
+            break
+
+    selected_lines = [lines[index] for index in selected_indices]
+    lead = selected_lines[0]
+    details = selected_lines[1:]
+    if not details:
+        return lead
+
+    return f"{lead}\n\n" + "\n".join(f"- {line}" for line in details)

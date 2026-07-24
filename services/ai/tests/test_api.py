@@ -174,7 +174,7 @@ def test_meal_endpoint_never_returns_stale_menu_as_current():
     assert payload["source_url"].endswith("/16863/subview.do")
 
 
-def test_expired_shuttle_schedule_only_links_to_current_official_page():
+def test_current_shuttle_question_returns_period_routes_and_times():
     with TestClient(app) as client:
         response = client.post(
             "/api/ai/query",
@@ -187,9 +187,46 @@ def test_expired_shuttle_schedule_only_links_to_current_official_page():
 
     payload = response.json()
     assert payload["mode"] == "structured"
-    assert "기간이 지나" in payload["response"]
-    assert "08:00" not in payload["response"]
+    assert "2학기" in payload["response"]
+    assert "유성 → 공주" in payload["response"]
+    assert "07:50" in payload["response"]
     assert payload["sources"][0]["source_url"].endswith("/16872/subview.do")
+
+
+def test_static_answer_starts_with_direct_fact_and_keeps_conditions():
+    with TestClient(app) as client:
+        response = client.post(
+            "/api/ai/query",
+            json={
+                "messages": [
+                    {"role": "user", "content": "휴학 신청 방법 알려줘"}
+                ]
+            },
+        )
+
+    answer = response.json()["response"]
+    assert answer.startswith("휴학은 포털시스템")
+    assert "신입생의 1학년 1학기" in answer
+    assert "관련 공식 자료예요" not in answer
+
+
+def test_parking_fee_question_returns_current_fee_instead_of_dormitory_fee():
+    with TestClient(app) as client:
+        response = client.post(
+            "/api/ai/query",
+            json={
+                "messages": [
+                    {"role": "user", "content": "주차비 얼마야?"}
+                ]
+            },
+        )
+
+    payload = response.json()
+    assert payload["sources"][0]["title"] == "주차안내"
+    assert payload["response"].startswith("방문차량 주차요금")
+    assert "1,000원" in payload["response"]
+    assert "10분마다 200원" in payload["response"]
+    assert "20,000원" in payload["response"]
 
 
 def test_city_bus_question_is_not_misrouted_to_parking_or_shuttle():

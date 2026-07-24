@@ -28,6 +28,14 @@ CAMPUS_ADDRESSES = {
 }
 KOREA_TIMEZONE = ZoneInfo("Asia/Seoul")
 SHUTTLE_SOURCE_URL = "https://www.kongju.ac.kr/KNU/16872/subview.do"
+SHUTTLE_ROUTE_SUMMARY = (
+    ("유성 → 공주", "07:50·09:10 출발"),
+    ("세종 → 공주", "08:00·09:00 출발"),
+    ("천안 → 공주", "07:40 출발"),
+    ("청주 → 공주", "07:30 출발"),
+    ("대전 → 천안", "07:30 출발"),
+    ("대전 → 예산", "월요일 07:40 출발"),
+)
 
 
 @asynccontextmanager
@@ -87,7 +95,9 @@ def shuttle_response(message: str) -> QueryResponse | None:
         return None
 
     service_period = shuttle_data.get("service_period", {})
-    current_year = datetime.now(KOREA_TIMEZONE).year
+    now = datetime.now(KOREA_TIMEZONE)
+    current_date = now.date()
+    current_year = now.year
     period_years = sorted(
         {
             int(str(value).split("-", 1)[0])
@@ -117,6 +127,47 @@ def shuttle_response(message: str) -> QueryResponse | None:
             mode="structured",
         )
 
+    semester_periods: list[tuple[str, Any, Any]] = []
+    for semester in ("1학기", "2학기"):
+        period = service_period.get(semester, {})
+        try:
+            start = datetime.fromisoformat(str(period.get("start"))).date()
+            end = datetime.fromisoformat(str(period.get("end"))).date()
+        except (TypeError, ValueError):
+            continue
+        semester_periods.append((semester, start, end))
+
+    active_semester = next(
+        (
+            (semester, start, end)
+            for semester, start, end in semester_periods
+            if start <= current_date <= end
+        ),
+        None,
+    )
+    upcoming_semester = next(
+        (
+            (semester, start, end)
+            for semester, start, end in semester_periods
+            if start > current_date
+        ),
+        None,
+    )
+
+    if active_semester:
+        semester, start, end = active_semester
+        service_status = (
+            f"현재 {semester} 무료버스 운행기간({start:%m.%d}~{end:%m.%d})입니다."
+        )
+    elif upcoming_semester:
+        semester, start, end = upcoming_semester
+        service_status = (
+            f"현재는 방학이라 정규 무료버스 운행기간이 아닙니다. "
+            f"{semester}는 {start:%m.%d}~{end:%m.%d} 운행 예정입니다."
+        )
+    else:
+        service_status = "현재 학기 정규 무료버스 운행기간이 종료되었습니다."
+
     routes = shuttle_data.get("shuttle_schedules", [])
     locations = set(tokenize(message))
     matching = [
@@ -124,19 +175,68 @@ def shuttle_response(message: str) -> QueryResponse | None:
         for route in routes
         if any(location in route.get("route", "") for location in locations)
     ]
-    selected = matching[:2] or routes[:1]
+    location_keywords = (
+        "공주",
+        "천안",
+        "예산",
+        "세종",
+        "유성",
+        "대전",
+        "청주",
+        "신창",
+        "두정",
+    )
+    is_general_question = not any(
+        keyword in message for keyword in location_keywords
+    )
+
+    source = Source(
+        category="캠퍼스",
+        title="2026 무료버스·순환버스 시간표",
+        snippet=(
+            "2026년 1학기는 3월 3일부터 6월 18일까지, "
+            "2학기는 9월 1일부터 12월 18일까지 운행 예정입니다."
+        ),
+        score=1.0,
+        source_url=SHUTTLE_SOURCE_URL,
+        reference_date="2026-07-24",
+    )
+
+    if is_general_question:
+        lines = [service_status, "", "주요 등교 노선과 출발 시간은 다음과 같습니다."]
+        lines.extend(f"- {route}: {times}" for route, times in SHUTTLE_ROUTE_SUMMARY)
+        lines.extend(
+            [
+                "- 캠퍼스 순환: 공주↔천안, 공주↔예산, 예산↔신창역",
+                "",
+                "공휴일·주말·개교기념일에는 운행하지 않습니다.",
+                f"[정류장별 공식 시간표]({SHUTTLE_SOURCE_URL})",
+            ]
+        )
+        return QueryResponse(
+            response="\n".join(lines),
+            sources=[source],
+            mode="structured",
+        )
+
+    selected = matching[:2]
     if not selected:
         return QueryResponse(
-            response="현재 등록된 셔틀버스 정보가 없습니다.",
+            response=(
+                f"{service_status}\n\n"
+                "해당 출발지의 시간표는 현재 등록된 자료에서 찾지 못했습니다.\n\n"
+                f"[전체 공식 시간표]({SHUTTLE_SOURCE_URL})"
+            ),
+            sources=[source],
             mode="fallback",
         )
 
-    period_label = "·".join(str(year) for year in period_years)
-    lines = [
-        f"아래 내용은 보관된 {period_label}년 셔틀 시간표로, 현재 운행을 보장하지 않는 참고 자료예요."
-    ]
+    lines = [service_status]
     for route in selected:
         lines.append(f"\n[{route.get('route', '노선')}]")
+        stops = [stop for stop in route.get("stops", []) if stop]
+        if stops:
+            lines.append(f"- 경유: {' → '.join(stops)}")
         for timetable in route.get("timetable", [])[:4]:
             departure = timetable.get("departure_time", "시간 미정")
             arrival = timetable.get("arrival_time")
@@ -144,8 +244,12 @@ def shuttle_response(message: str) -> QueryResponse | None:
                 f"- {departure} 출발"
                 + (f" · {arrival} 도착" if arrival else "")
             )
-    lines.append("\n이용 전에는 학교 공식 공지에서 최신 시간표를 반드시 확인해 주세요.")
-    return QueryResponse(response="\n".join(lines), mode="structured")
+    lines.append(f"\n[정류장별 공식 시간표]({SHUTTLE_SOURCE_URL})")
+    return QueryResponse(
+        response="\n".join(lines),
+        sources=[source],
+        mode="structured",
+    )
 
 
 def campus_address_response(message: str) -> QueryResponse | None:

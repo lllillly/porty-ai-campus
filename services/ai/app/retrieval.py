@@ -43,6 +43,7 @@ QUERY_EXPANSIONS = {
     "재학증명": ("증명서",),
     "기숙사비": ("생활관비", "학생생활관 비용"),
     "생활관비": ("학생생활관 비용",),
+    "주차비": ("주차요금", "주차안내"),
     "학식": ("식단", "학생식당"),
     "학생증": ("학생증 발급",),
     "개강": ("학사일정",),
@@ -310,6 +311,8 @@ class BM25Retriever:
         lines = [clean_text(line) for line in content.splitlines() if clean_text(line)]
         if not lines:
             return clean_text(content)[:max_length]
+        if sum(len(line) + 1 for line in lines) <= max_length:
+            return "\n".join(lines)
 
         scored_lines: list[tuple[float, int]] = []
         for index, line in enumerate(lines):

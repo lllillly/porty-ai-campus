@@ -23,6 +23,7 @@ def retriever():
         ("졸업하려면 몇 학점 필요해?", "졸업"),
         ("졸업 학점은 몇 학점이야?", "졸업"),
         ("주차 요금이 얼마야?", "주차안내"),
+        ("주차비 얼마야?", "주차안내"),
         ("장학금 신청 시기가 언제야?", "장학안내"),
         ("전과는 어떻게 해?", "모집단위 이동(전과)"),
         ("기숙사 신청은 어떻게 해?", "학생생활관 입실 신청"),
@@ -100,3 +101,22 @@ def test_answer_context_includes_source_metadata(retriever):
     assert "공식 출처:" in context
     assert "학교 자료 1" in context
     assert "수강신청 시스템" in extractive_answer(hit)
+
+
+def test_extractive_answer_leads_with_answer_instead_of_search_heading(
+    retriever,
+):
+    hit = retriever.search("졸업 요건 알려줘", 1)[0]
+    answer = extractive_answer(hit, "졸업 요건 알려줘")
+
+    assert "일반적인 졸업 필요학점은 130학점" in answer
+    assert "관련 공식 자료예요" not in answer
+    assert "확인해 주세요" not in answer.splitlines()[0]
+
+
+def test_library_answer_contains_actual_hours(retriever):
+    hit = retriever.search("도서관 운영시간 알려줘", 1)[0]
+    answer = extractive_answer(hit, "도서관 운영시간 알려줘")
+
+    assert "06:00~23:00" in answer
+    assert "7권" in answer
