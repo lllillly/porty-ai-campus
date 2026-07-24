@@ -4,6 +4,10 @@
   "outputDirectory": "apps/web/dist",
   "rewrites": [
     {
+      "source": "/calendar-data",
+      "destination": "/api/calendar"
+    },
+    {
       "source": "/api/(.*)",
       "destination": "/api/index"
     },

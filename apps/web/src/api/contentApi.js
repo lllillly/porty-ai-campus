@@ -8,8 +8,12 @@ async function readJson(request) {
   return request.json();
 }
 
-export async function getScheduleReference() {
-  return readJson(await fetch(`${aiApiUrl}/api/ai/schedule`));
+export async function getScheduleCalendar({ year, month }) {
+  const params = new URLSearchParams({
+    year: String(year),
+    month: String(month),
+  });
+  return readJson(await fetch(`/calendar-data?${params}`));
 }
 
 export async function getMealStatus({ campus, place, dorm }) {
