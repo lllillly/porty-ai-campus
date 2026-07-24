@@ -24,7 +24,7 @@ export const ChatContainer = styled.main`
 `;
 
 export const Header = styled.header`
-  flex: 0 0 68px;
+  flex: 0 0 62px;
   display: flex;
   align-items: center;
   background: ${({ $isDark }) =>
@@ -34,7 +34,7 @@ export const Header = styled.header`
   z-index: 30;
 
   @media (max-width: 768px) {
-    flex-basis: 64px;
+    flex-basis: 58px;
   }
 `;
 
@@ -57,50 +57,49 @@ export const BrandButton = styled.button`
   min-width: 0;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 4px 8px 4px 4px;
+  gap: 9px;
+  padding: 0;
   border: 0;
-  border-radius: 10px;
+  border-radius: 0;
   background: transparent;
   color: inherit;
   cursor: pointer;
   text-align: left;
-  transition: background 160ms ease;
+  transition: opacity 160ms ease;
 
   &:hover {
-    background: ${({ $isDark }) => ($isDark ? "#213C31" : palette.mint)};
+    opacity: 0.76;
   }
 `;
 
 export const Logo = styled.img`
-  width: 40px;
-  height: 40px;
-  flex: 0 0 40px;
+  width: 38px;
+  height: 42px;
+  flex: 0 0 38px;
   padding: 0;
   border: 0;
-  border-radius: 10px;
-  background: var(--porty-primary-soft);
+  border-radius: 0;
+  background: transparent;
   object-fit: cover;
-  object-position: center top;
+  object-position: center 12%;
 
   @media (max-width: 768px) {
-    width: 38px;
+    width: 34px;
     height: 38px;
-    flex-basis: 38px;
-    border-radius: 9px;
+    flex-basis: 34px;
   }
 `;
 
 export const BrandCopy = styled.span`
   min-width: 0;
   display: grid;
-  gap: 3px;
+  gap: 2px;
 `;
 
 export const BrandName = styled.strong`
   color: ${({ $isDark }) => ($isDark ? "#F5F7F6" : palette.text)};
-  font-size: 17px;
-  font-weight: 800;
+  font-size: 16px;
+  font-weight: 760;
   letter-spacing: -0.035em;
   line-height: 1.15;
 `;
@@ -108,34 +107,30 @@ export const BrandName = styled.strong`
 export const BrandStatus = styled.span`
   display: block;
   color: ${({ $isDark }) => ($isDark ? "#AEB8B3" : palette.subtext)};
-  font-size: 10.5px;
-  font-weight: 550;
+  font-size: 10px;
+  font-weight: 450;
   line-height: 1.2;
-
 `;
 
 export const HeaderActions = styled.div`
   display: flex;
   align-items: center;
-  gap: 8px;
-
+  gap: 2px;
+  padding-left: 10px;
+  border-left: 1px solid var(--porty-border);
 `;
 
 const HeaderIconButton = styled.button`
-  width: auto;
-  height: 38px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  padding: 0 11px;
-  border: 1px solid
-    ${({ $isDark }) => ($isDark ? "#34413A" : palette.border)};
-  border-radius: 10px;
-  background: ${({ $isDark }) => ($isDark ? "#252E29" : "#FFFFFF")};
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
   color: ${({ $isDark }) => ($isDark ? "#D8DEDB" : "#426050")};
-  font-size: 12px;
-  font-weight: 700;
   cursor: pointer;
   transition:
     background 160ms ease,
@@ -143,7 +138,6 @@ const HeaderIconButton = styled.button`
     transform 160ms ease;
 
   &:hover {
-    border-color: var(--porty-primary);
     background: ${({ $isDark }) => ($isDark ? "#213C31" : palette.mint)};
     color: ${({ $isDark }) => ($isDark ? "#8CE2BD" : palette.greenHover)};
   }
@@ -152,13 +146,13 @@ const HeaderIconButton = styled.button`
     transform: scale(0.96);
   }
 
-  @media (max-width: 520px) {
-    width: 42px;
-    padding: 0;
+  span {
+    display: none;
+  }
 
-    span {
-      display: none;
-    }
+  @media (max-width: 520px) {
+    width: 34px;
+    height: 34px;
   }
 `;
 

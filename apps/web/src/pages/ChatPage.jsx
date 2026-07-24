@@ -272,7 +272,7 @@ const ChatPage = () => {
             <BrandCopy>
               <BrandName $isDark={isDarkMode}>공주대 챗봇</BrandName>
               <BrandStatus $isDark={isDarkMode}>
-                학교생활 정보를 빠르게 찾아드려요
+                국립공주대학교 학생생활 안내
               </BrandStatus>
             </BrandCopy>
           </BrandButton>
@@ -284,7 +284,7 @@ const ChatPage = () => {
               title="식단 설정"
               aria-label="식단 설정 열기"
             >
-              <Coffee size={19} />
+              <Coffee size={18} />
               <span>식단</span>
             </NotificationButton>
 
@@ -294,7 +294,7 @@ const ChatPage = () => {
               title="포티 설정"
               aria-label="포티 설정 열기"
             >
-              <Settings size={20} />
+              <Settings size={18} />
               <span>설정</span>
             </MenuButton>
           </HeaderActions>
