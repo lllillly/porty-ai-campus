@@ -14,6 +14,7 @@ import FAQPreview from "../components/FAQPreview";
 import Toast from "../components/Toast";
 import SettingsModal from "../components/SettingsModal";
 import SplashScreen from "../components/SplashScreen";
+import { isAcademicCalendarQuery } from "../utils/queryIntents";
 
 import {
   ChatContainer,
@@ -130,7 +131,7 @@ const ChatPage = () => {
 
     appendChat({ sender: "user", text });
 
-    if (text === "학사 일정") {
+    if (isAcademicCalendarQuery(text)) {
       appendChat({
         sender: "porty",
         component: <CalendarCard onBackToMain={handleBackToMain} />,
@@ -204,7 +205,7 @@ const ChatPage = () => {
   const handleBackToMain = () =>
     appendChat({
       sender: "porty",
-      text: "다른 도움이 필요하시면 아래 버튼을 선택해주세요!",
+      text: "다른 도움이 필요하시면 아래 버튼을 선택해 주세요.",
       showQuickActions: true,
     });
 

@@ -1,3 +1,5 @@
+import re
+
 from fastapi.testclient import TestClient
 
 import app.main as main
@@ -41,6 +43,119 @@ def test_query_returns_verified_campus_address():
     assert payload["mode"] == "structured"
     assert "천안대로 1223-24" in payload["response"]
     assert payload["sources"][0]["category"] == "캠퍼스"
+
+
+def test_where_questions_return_the_building_campus_and_street_address():
+    cases = (
+        ("9공학관 어디야?", "천안캠퍼스", "천안대로 1223-24"),
+        ("중앙도서관이 어디야?", "공주캠퍼스", "공주대학로 56"),
+        ("드림하우스 위치 알려줘", "공주캠퍼스", "공주대학로 56"),
+        ("옥룡캠퍼스는 어디인가요?", "옥룡캠퍼스", "우금티로 753"),
+    )
+
+    with TestClient(app) as client:
+        for question, campus, address in cases:
+            response = client.post(
+                "/api/ai/query",
+                json={"messages": [{"role": "user", "content": question}]},
+            )
+            payload = response.json()
+            assert payload["mode"] == "structured"
+            assert campus in payload["response"]
+            assert address in payload["response"]
+
+
+def test_university_intro_is_not_misrouted_to_admission_headlines():
+    with TestClient(app) as client:
+        response = client.post(
+            "/api/ai/query",
+            json={
+                "messages": [
+                    {"role": "user", "content": "공주대학교에 대해 알려주세요"}
+                ]
+            },
+        )
+
+    answer = response.json()["response"]
+    assert answer.startswith("국립공주대학교는 1948년")
+    assert "공주캠퍼스" in answer
+    assert "천안캠퍼스" in answer
+    assert "학생부종합전형" not in answer
+
+
+def test_academic_special_questions_return_direct_answers():
+    cases = (
+        (
+            "국가장학금 신청 방법 알려줘",
+            "한국장학재단",
+            "국가장학금 신청",
+        ),
+        (
+            "학점 포기할 수 있어?",
+            "현재 수강 중인 과목",
+            "최종 수강신청 변경 및 수강포기",
+        ),
+        (
+            "교환학생 신청 방법 알려줘",
+            "국제교류과",
+            "교환학생 선발 안내",
+        ),
+        (
+            "졸업논문 꼭 써야 해?",
+            "졸업종합시험",
+            "졸업논문",
+        ),
+        (
+            "계절학기 신청 방법 알려줘",
+            "최대 6학점",
+            "계절학기",
+        ),
+    )
+
+    with TestClient(app) as client:
+        for question, expected_answer, expected_source in cases:
+            response = client.post(
+                "/api/ai/query",
+                json={"messages": [{"role": "user", "content": question}]},
+            )
+            payload = response.json()
+            assert payload["mode"] == "structured"
+            assert expected_answer in payload["response"]
+            assert payload["sources"][0]["title"] == expected_source
+
+
+def test_student_counseling_center_where_question_returns_address():
+    with TestClient(app) as client:
+        response = client.post(
+            "/api/ai/query",
+            json={
+                "messages": [
+                    {"role": "user", "content": "학생상담센터 어디야?"}
+                ]
+            },
+        )
+
+    payload = response.json()
+    assert payload["mode"] == "structured"
+    assert "학생복지관 2층" in payload["response"]
+    assert "공주대학로 56" in payload["response"]
+
+
+def test_library_borrowing_question_leads_with_limit_not_opening_hours():
+    with TestClient(app) as client:
+        response = client.post(
+            "/api/ai/query",
+            json={
+                "messages": [
+                    {"role": "user", "content": "도서관 책 몇 권 빌릴 수 있어?"}
+                ]
+            },
+        )
+
+    payload = response.json()
+    assert payload["mode"] == "structured"
+    assert payload["response"].startswith("학부생은 일반도서를 7권까지")
+    assert payload["sources"][0]["title"] == "도서관 도서 대출"
 
 
 def test_schedule_excludes_unrelated_search_results():
@@ -251,6 +366,28 @@ def test_static_answer_starts_with_direct_fact_and_keeps_conditions():
     assert answer.startswith("휴학은 포털시스템")
     assert "신입생의 1학년 1학기" in answer
     assert "관련 공식 자료예요" not in answer
+
+
+def test_retrieval_answers_use_formal_honorific_endings():
+    questions = (
+        "도서관 운영시간 알려줘",
+        "졸업 요건이 뭐야?",
+        "휴학 신청 방법 알려줘",
+        "장학금 종류 알려줘",
+        "주차비 얼마야?",
+    )
+    informal_endings = re.compile(
+        r"(?:한다|된다|이다|있다|없다|다르다|거친다|안전하다|"
+        r"가능하다|제도다|좋다|무료다)\."
+    )
+
+    with TestClient(app) as client:
+        for question in questions:
+            answer = client.post(
+                "/api/ai/query",
+                json={"messages": [{"role": "user", "content": question}]},
+            ).json()["response"]
+            assert informal_endings.search(answer) is None
 
 
 def test_parking_fee_question_returns_current_fee_instead_of_dormitory_fee():

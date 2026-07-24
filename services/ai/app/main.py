@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from contextlib import asynccontextmanager
 from datetime import date, datetime
+import re
 from typing import Any
 from zoneinfo import ZoneInfo
 
@@ -24,9 +25,52 @@ profanity: set[str]
 CAMPUS_ADDRESSES = {
     "공주": "충청남도 공주시 공주대학로 56",
     "신관": "충청남도 공주시 공주대학로 56",
+    "옥룡": "충청남도 공주시 우금티로 753",
     "천안": "충청남도 천안시 서북구 천안대로 1223-24",
     "예산": "충청남도 예산군 예산읍 대학로 54",
 }
+CAMPUS_DISPLAY_NAMES = {
+    "공주": "공주캠퍼스",
+    "신관": "공주캠퍼스",
+    "옥룡": "옥룡캠퍼스",
+    "천안": "천안캠퍼스",
+    "예산": "예산캠퍼스",
+}
+BUILDING_LOCATIONS = (
+    (("중앙도서관", "제2도서관"), "중앙도서관", "공주"),
+    (("웅비학생회관",), "웅비학생회관", "공주"),
+    (("대학본부", "본부"), "대학본부", "공주"),
+    (
+        ("학생상담센터", "행복상담센터"),
+        "학생상담센터(학생복지관 2층)",
+        "공주",
+    ),
+    (("학생복지관",), "학생복지관", "공주"),
+    (("사범대학관", "사범대"), "사범대학관", "공주"),
+    (("자연과학대학관", "자연대"), "자연과학대학관", "공주"),
+    (("인문사회과학대학관", "인사대"), "인문사회과학대학관", "공주"),
+    (("간호보건대학예술대학관",), "간호보건대학·예술대학관", "공주"),
+    (("세종한민족교육문화센터",), "세종한민족교육문화센터", "공주"),
+    (("백제교육문화관",), "백제교육문화관", "공주"),
+    (("국제교육원",), "국제교육원", "공주"),
+    (("공주국민체육센터",), "공주국민체육센터", "공주"),
+    (("드림하우스",), "드림하우스", "공주"),
+    (("비전하우스",), "비전하우스", "공주"),
+    (("블룸하우스",), "블룸하우스", "공주"),
+    (("은행사",), "은행사", "공주"),
+    (("홍익사",), "홍익사", "공주"),
+    (("해오름집",), "해오름집", "공주"),
+    (("천안공과대학", "천안공대"), "천안공과대학", "천안"),
+    (("산업과학대학",), "산업과학대학", "예산"),
+)
+AMBIGUOUS_CAMPUS_FACILITIES = (
+    "학생회관",
+    "보건진료소",
+    "생활관",
+    "기숙사",
+    "체육관",
+    "도서관",
+)
 KOREA_TIMEZONE = ZoneInfo("Asia/Seoul")
 SHUTTLE_SOURCE_URL = "https://www.kongju.ac.kr/KNU/16872/subview.do"
 SHUTTLE_ROUTE_SUMMARY = (
@@ -87,6 +131,237 @@ def small_talk_response(message: str) -> str | None:
         ):
             return response
     return None
+
+
+def university_intro_response(message: str) -> QueryResponse | None:
+    if not any(name in message for name in ("공주대학교", "공주대", "국립공주대")):
+        return None
+    if not any(
+        keyword in message
+        for keyword in ("알려", "소개", "어떤 학교", "뭐 하는 학교", "대해")
+    ):
+        return None
+
+    response = (
+        "국립공주대학교는 1948년 공주사범대학으로 출발한 국립 종합대학교입니다.\n\n"
+        "- 공주캠퍼스: 사범·인문사회·자연과학·간호보건·예술 분야\n"
+        "- 천안캠퍼스: 공학 분야\n"
+        "- 예산캠퍼스: 농생명·산업과학 분야\n"
+        "- 교육이념: 진리탐구·가치창조·정의실천\n\n"
+        "[학교 현황 확인](https://www.kongju.ac.kr/KNU/16692/subview.do)"
+    )
+    return QueryResponse(
+        response=response,
+        sources=[
+            Source(
+                category="학교안내",
+                title="국립공주대학교 현황",
+                snippet=(
+                    "1948년 공주사범대학으로 출발한 국립 종합대학교로 "
+                    "공주·천안·예산 캠퍼스를 운영합니다."
+                ),
+                score=1.0,
+                source_url="https://www.kongju.ac.kr/KNU/16692/subview.do",
+                reference_date="2026-07-24",
+            )
+        ],
+        mode="structured",
+    )
+
+
+def academic_special_response(message: str) -> QueryResponse | None:
+    normalized = re.sub(r"\s+", "", message)
+
+    if "국가장학금" in normalized:
+        response = (
+            "국가장학금은 한국장학재단에서 해당 학기의 신청 기간 안에 신청합니다.\n\n"
+            "- 신청 후 가구원 동의와 필요한 서류 제출까지 완료해야 합니다.\n"
+            "- 신청 기간과 심사 조건은 학기마다 달라질 수 있으므로 "
+            "한국장학재단과 학교의 최신 공지를 확인해 주세요.\n\n"
+            "[교내 장학 안내]"
+            "(https://www.kongju.ac.kr/KNU/16842/subview.do)"
+        )
+        return QueryResponse(
+            response=response,
+            sources=[
+                Source(
+                    category="학생생활",
+                    title="국가장학금 신청",
+                    snippet=(
+                        "한국장학재단에서 신청하고 가구원 동의와 필요한 "
+                        "서류 제출을 완료해야 합니다."
+                    ),
+                    score=1.0,
+                    source_url=(
+                        "https://www.kongju.ac.kr/KNU/16842/subview.do"
+                    ),
+                    reference_date="2026-07-24",
+                )
+            ],
+            mode="structured",
+        )
+
+    if "졸업논문" in normalized:
+        response = (
+            "졸업논문 통과는 원칙적으로 졸업요건에 포함됩니다. 다만 학과에 따라 "
+            "실험·실습 보고서, 실기 발표 또는 졸업종합시험으로 대체할 수 있습니다.\n\n"
+            "- 대체 여부와 세부 기준은 소속 학과에 확인해야 합니다.\n"
+            "- 논문 제출 자격과 제출 기한도 별도 기준이 있으므로 공식 안내를 확인해 주세요.\n\n"
+            "[졸업논문 공식 안내]"
+            "(https://onestop.kongju.ac.kr/onestop/17881/subview.do)"
+        )
+        return QueryResponse(
+            response=response,
+            sources=[
+                Source(
+                    category="학사",
+                    title="졸업논문",
+                    snippet=(
+                        "졸업논문이 원칙이며 학과에 따라 실험·실습 보고서, "
+                        "실기 발표 또는 졸업종합시험으로 대체할 수 있습니다."
+                    ),
+                    score=1.0,
+                    source_url=(
+                        "https://onestop.kongju.ac.kr/onestop/17881/subview.do"
+                    ),
+                    reference_date="2026-07-24",
+                )
+            ],
+            mode="structured",
+        )
+
+    if "교환학생" in normalized:
+        response = (
+            "교환학생은 국제교류과가 학기별로 게시하는 선발 공고에서 지원 대학과 "
+            "자격을 확인한 뒤, 공고에 첨부된 서류를 기간 안에 제출해 지원합니다.\n\n"
+            "- 해외 대학에 개인이 먼저 신청하는 방식이 아니라, 교내 선발 후 "
+            "국제교류과의 추천 절차를 거칩니다.\n"
+            "- 재학 학기, 성적, 어학 조건은 대학과 언어권에 따라 다릅니다.\n"
+            "- 2026학년도 2학기 모집은 종료되었으므로 다음 선발 공고를 확인해야 합니다.\n\n"
+            "[교환학생 선발 공고 확인]"
+            "(https://www.kongju.ac.kr/bbs/KNU/2132/424509/artclView.do)"
+        )
+        return QueryResponse(
+            response=response,
+            sources=[
+                Source(
+                    category="국제교류",
+                    title="교환학생 선발 안내",
+                    snippet=(
+                        "국제교류과의 학기별 선발 공고에 따라 교내 선발과 "
+                        "추천 절차를 거쳐 지원합니다."
+                    ),
+                    score=1.0,
+                    source_url=(
+                        "https://www.kongju.ac.kr/bbs/KNU/2132/424509/"
+                        "artclView.do"
+                    ),
+                    reference_date="2026-07-24",
+                )
+            ],
+            mode="structured",
+        )
+
+    if any(keyword in normalized for keyword in ("학점포기", "수강포기")):
+        response = (
+            "현재 수강 중인 과목을 포기하려는 경우, 해당 학기의 수강포기 기간에 "
+            "학교가 안내한 절차로 신청할 수 있습니다.\n\n"
+            "- 이미 취득한 학점을 임의로 삭제하는 것과 현재 수강 과목을 "
+            "포기하는 것은 다릅니다.\n"
+            "- 신청 기간, 대상 과목, 최소 수강학점은 해당 학기의 "
+            "최종 수강신청 변경·수강포기 공지를 확인해야 합니다.\n\n"
+            "[수강포기 공식 공지 확인]"
+            "(https://www.kongju.ac.kr/bbs/KNU/2132/423723/artclView.do)"
+        )
+        return QueryResponse(
+            response=response,
+            sources=[
+                Source(
+                    category="학사",
+                    title="최종 수강신청 변경 및 수강포기",
+                    snippet=(
+                        "현재 수강 과목의 포기는 학기별 공지에 따른 기간과 "
+                        "절차를 확인해야 합니다."
+                    ),
+                    score=1.0,
+                    source_url=(
+                        "https://www.kongju.ac.kr/bbs/KNU/2132/423723/"
+                        "artclView.do"
+                    ),
+                    reference_date="2026-07-24",
+                )
+            ],
+            mode="structured",
+        )
+
+    if "계절학기" in normalized and any(
+        keyword in normalized
+        for keyword in ("신청", "방법", "학점", "자격", "수강료")
+    ):
+        response = (
+            "계절학기는 재학생이 학기별 수강신청 안내에 따라 신청합니다.\n\n"
+            "- 하계는 보통 5~6월, 동계는 11~12월에 모집합니다.\n"
+            "- 한 계절학기에 최대 6학점까지 신청할 수 있습니다.\n"
+            "- 수강료와 개설 과목은 학기별 공지에서 확인해야 합니다.\n\n"
+            "[계절학기 공식 안내]"
+            "(https://onestop.kongju.ac.kr/onestop/17886/subview.do)"
+        )
+        return QueryResponse(
+            response=response,
+            sources=[
+                Source(
+                    category="학사",
+                    title="계절학기",
+                    snippet=(
+                        "재학생이 신청할 수 있으며 하계 5~6월, 동계 "
+                        "11~12월에 모집하고 최대 6학점까지 신청할 수 있습니다."
+                    ),
+                    score=1.0,
+                    source_url=(
+                        "https://onestop.kongju.ac.kr/onestop/17886/subview.do"
+                    ),
+                    reference_date="2026-07-24",
+                )
+            ],
+            mode="structured",
+        )
+
+    return None
+
+
+def student_service_response(message: str) -> QueryResponse | None:
+    normalized = re.sub(r"\s+", "", message)
+    asks_about_borrowing = any(
+        keyword in normalized
+        for keyword in ("몇권", "대출", "빌릴", "빌려", "대여")
+    )
+    if "도서관" not in normalized or not asks_about_borrowing:
+        return None
+
+    response = (
+        "학부생은 일반도서를 7권까지 14일 동안 대출할 수 있습니다.\n\n"
+        "- 예약 자료와 연체 자료가 아니면 1회 연장할 수 있습니다.\n"
+        "- 자료 유형이나 이용자 신분에 따라 기준이 다를 수 있으므로 "
+        "도서관 홈페이지에서 현재 대출 상태를 확인해 주세요.\n\n"
+        "[도서관 홈페이지](https://library.kongju.ac.kr/)"
+    )
+    return QueryResponse(
+        response=response,
+        sources=[
+            Source(
+                category="학생생활",
+                title="도서관 도서 대출",
+                snippet=(
+                    "학부생은 일반도서를 7권까지 14일 동안 대출할 수 있고 "
+                    "조건을 충족하면 1회 연장할 수 있습니다."
+                ),
+                score=1.0,
+                source_url="https://library.kongju.ac.kr/",
+                reference_date="2026-07-24",
+            )
+        ],
+        mode="structured",
+    )
 
 
 def meal_selection(message: str) -> tuple[str, str, str | None] | None:
@@ -235,7 +510,7 @@ def shuttle_response(message: str) -> QueryResponse | None:
     )
     if not period_years or max(period_years) < current_year:
         content = (
-            "저장된 셔틀 시간표는 기간이 지나 현재 운행시간으로 안내하지 않아요. "
+            "저장된 셔틀 시간표는 기간이 지나 현재 운행시간으로 안내하지 않습니다. "
             "학교 공식 버스 안내에서 최신 운행기간과 노선을 확인해 주세요.\n\n"
             f"[최신 셔틀·무료버스 시간표 확인]({SHUTTLE_SOURCE_URL})"
         )
@@ -380,26 +655,96 @@ def shuttle_response(message: str) -> QueryResponse | None:
 
 
 def campus_address_response(message: str) -> QueryResponse | None:
-    if not any(keyword in message for keyword in ("주소", "위치", "찾아가", "가는 길")):
+    if not any(
+        keyword in message
+        for keyword in ("어디", "주소", "위치", "찾아가", "가는 길")
+    ):
         return None
 
-    for campus, address in CAMPUS_ADDRESSES.items():
-        if campus in message:
-            display_name = "공주" if campus == "신관" else campus
-            content = f"{display_name}캠퍼스 주소는 {address}입니다."
-            return QueryResponse(
-                response=content,
-                sources=[
-                    Source(
-                        category="캠퍼스",
-                        title=f"{display_name}캠퍼스 주소",
-                        snippet=content,
-                        score=1.0,
-                        source_url="https://www.kongju.ac.kr/KNU/16713/subview.do",
-                    )
-                ],
-                mode="structured",
+    explicit_campus = next(
+        (
+            campus
+            for campus in ("옥룡", "천안", "예산", "신관")
+            if campus in message
+        ),
+        None,
+    )
+    if explicit_campus is None and any(
+        keyword in message
+        for keyword in ("공주캠퍼스", "공주대학교", "공주대", "국립공주대")
+    ):
+        explicit_campus = "공주"
+
+    building_name = None
+    building_campus = None
+    engineering_match = re.search(r"(?:제\s*)?(\d{1,2})\s*공학관", message)
+    if engineering_match:
+        number = int(engineering_match.group(1))
+        building_name = f"제{number}공학관"
+        building_campus = "천안"
+    else:
+        for aliases, display_name, campus in BUILDING_LOCATIONS:
+            if any(alias in message for alias in aliases):
+                building_name = display_name
+                building_campus = campus
+                break
+
+    if (
+        not building_name
+        and not explicit_campus
+        and any(facility in message for facility in AMBIGUOUS_CAMPUS_FACILITIES)
+    ):
+        content = (
+            "해당 시설은 캠퍼스마다 있어 캠퍼스를 함께 지정해야 정확한 건물을 안내할 수 있습니다.\n\n"
+            f"- 공주캠퍼스: {CAMPUS_ADDRESSES['공주']}\n"
+            f"- 천안캠퍼스: {CAMPUS_ADDRESSES['천안']}\n"
+            f"- 예산캠퍼스: {CAMPUS_ADDRESSES['예산']}"
+        )
+        return QueryResponse(
+            response=content,
+            sources=[
+                Source(
+                    category="캠퍼스",
+                    title="캠퍼스별 주소",
+                    snippet=content,
+                    score=1.0,
+                    source_url="https://www.kongju.ac.kr/KNU/16713/subview.do",
+                )
+            ],
+            mode="structured",
+        )
+
+    campus = building_campus or explicit_campus
+    if campus:
+        campus_name = CAMPUS_DISPLAY_NAMES[campus]
+        address = CAMPUS_ADDRESSES[campus]
+        if building_name:
+            content = (
+                f"{building_name}의 위치는 {campus_name}입니다.\n\n"
+                f"- 도로명 주소: {address}\n"
+                "- 건물 위치: 아래 공식 캠퍼스맵에서 건물명을 선택하면 확인할 수 있습니다.\n\n"
+                "[공식 캠퍼스맵](https://www.kongju.ac.kr/KNU/16708/subview.do)"
             )
+            title = f"{building_name} 위치"
+            source_url = "https://www.kongju.ac.kr/KNU/16708/subview.do"
+        else:
+            content = f"{campus_name}의 도로명 주소는 {address}입니다."
+            title = f"{campus_name} 주소"
+            source_url = "https://www.kongju.ac.kr/KNU/16713/subview.do"
+        return QueryResponse(
+            response=content,
+            sources=[
+                Source(
+                    category="캠퍼스",
+                    title=title,
+                    snippet=content,
+                    score=1.0,
+                    source_url=source_url,
+                    reference_date="2026-07-24",
+                )
+            ],
+            mode="structured",
+        )
 
     return None
 
@@ -499,6 +844,12 @@ def query(body: QueryRequest, request: Request) -> QueryResponse:
     if response := small_talk_response(message):
         return QueryResponse(response=response, mode="small-talk")
 
+    if response := university_intro_response(message):
+        return response
+
+    if response := academic_special_response(message):
+        return response
+
     if response := shuttle_response(message):
         return response
 
@@ -506,7 +857,7 @@ def query(body: QueryRequest, request: Request) -> QueryResponse:
         return QueryResponse(
             response=(
                 "시내버스 노선과 도착시간은 실시간으로 바뀌어 PORTY의 저장 자료로 "
-                "안내하지 않아요. 지도·교통 앱에서 현재 위치 기준으로 확인해 주세요."
+                "안내하지 않습니다. 지도·교통 앱에서 현재 위치 기준으로 확인해 주세요."
             ),
             mode="fallback",
         )
@@ -514,12 +865,15 @@ def query(body: QueryRequest, request: Request) -> QueryResponse:
     if response := campus_address_response(message):
         return response
 
+    if response := student_service_response(message):
+        return response
+
     search_query = retrieval_message(body, message)
     hits = relevant_hits(retriever.search(search_query, settings.top_k))
     if not hits:
         return QueryResponse(
             response=(
-                "저장된 공주대학교 자료에서 관련 내용을 찾지 못했어요. "
+                "저장된 공주대학교 자료에서 관련 내용을 찾지 못했습니다. "
                 "학사 일정, 캠퍼스 위치, 학과, 셔틀버스처럼 범위를 좁혀 질문해 주세요."
             ),
             mode="fallback",

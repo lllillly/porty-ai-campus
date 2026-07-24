@@ -170,7 +170,7 @@ const CalendarCard = ({ onBackToMain }) => {
         </SelectedDate>
 
         {state.status === "loading" ? (
-          <StateMessage>공식 학사일정을 불러오고 있어요.</StateMessage>
+          <StateMessage>공식 학사일정을 불러오고 있습니다.</StateMessage>
         ) : selectedEvents.length > 0 ? (
           <EventList>
             {selectedEvents.map((event) => (
@@ -186,13 +186,13 @@ const CalendarCard = ({ onBackToMain }) => {
         ) : (
           <StateMessage>
             {state.status === "error"
-              ? "일정을 불러오지 못했어요. 공식 일정에서 확인해 주세요."
-              : "이 날짜에 등록된 학사일정이 없어요."}
+              ? "일정을 불러오지 못했습니다. 공식 일정에서 확인해 주세요."
+              : "이 날짜에 등록된 학사일정이 없습니다."}
           </StateMessage>
         )}
       </SchedulePanel>
 
-      <Notice>일정은 학교 사정에 따라 변경될 수 있어요.</Notice>
+      <Notice>일정은 학교 사정에 따라 변경될 수 있습니다.</Notice>
       <BackButton onClick={onBackToMain}>
         <Home size={15} /> 메인으로
       </BackButton>

@@ -49,7 +49,7 @@ const DietCard = ({ campus, place, dorm, onBackToMain }) => {
         </StatusBadge>
       </Header>
 
-      {state.status === "loading" && <Text>식단 연동 상태를 확인하고 있어요.</Text>}
+      {state.status === "loading" && <Text>식단 연동 상태를 확인하고 있습니다.</Text>}
       {state.status === "error" && (
         <Notice>AI 서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.</Notice>
       )}
