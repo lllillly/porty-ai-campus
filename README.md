@@ -29,7 +29,7 @@
 
 기존 [PORTY 프론트엔드](https://github.com/lllillly/Porty)와
 [PORTY 데이터 프로젝트](https://github.com/lllillly/PortyProject)를 바탕으로,
-검색·실시간 데이터 수집·인증·배포 구조를 다시 설계한 개인 고도화
+검색·실시간 데이터 수집·인증·배포 구조를 AI 에이전트를 활용해서 함께 다시 설계하고 개발한 개인 고도화
 프로젝트입니다.
 
 | 구분 | 내용 |
