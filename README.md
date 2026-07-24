@@ -10,8 +10,6 @@
 
 <p align="center">
   <a href="https://porty-ai-campus.vercel.app"><strong>서비스 이용하기</strong></a>
-  ·
-  <a href="https://porty-ai-campus.vercel.app/health">서비스 상태</a>
 </p>
 
 <p align="center">
