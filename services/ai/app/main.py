@@ -3,6 +3,7 @@ from __future__ import annotations
 from contextlib import asynccontextmanager
 from datetime import date, datetime
 import re
+from secrets import choice
 from typing import Any
 from zoneinfo import ZoneInfo
 
@@ -18,7 +19,7 @@ from .retrieval import LexicalRetriever, read_json, tokenize
 
 settings: Settings = load_settings()
 retriever: LexicalRetriever
-small_talk: dict[str, str]
+small_talk: dict[str, str | list[str]]
 shuttle_data: dict[str, Any]
 profanity: set[str]
 
@@ -74,12 +75,12 @@ AMBIGUOUS_CAMPUS_FACILITIES = (
 KOREA_TIMEZONE = ZoneInfo("Asia/Seoul")
 SHUTTLE_SOURCE_URL = "https://www.kongju.ac.kr/KNU/16872/subview.do"
 SHUTTLE_ROUTE_SUMMARY = (
-    ("유성 → 공주", "07:50·09:10 출발"),
-    ("세종 → 공주", "08:00·09:00 출발"),
-    ("천안 → 공주", "07:40 출발"),
-    ("청주 → 공주", "07:30 출발"),
-    ("대전 → 천안", "07:30 출발"),
-    ("대전 → 예산", "월요일 07:40 출발"),
+    {"name": "유성 → 공주", "departures": ("07:50", "09:10")},
+    {"name": "세종 → 공주", "departures": ("08:00", "09:00")},
+    {"name": "천안 → 공주", "departures": ("07:40",)},
+    {"name": "청주 → 공주", "departures": ("07:30",)},
+    {"name": "대전 → 천안", "departures": ("07:30",)},
+    {"name": "대전 → 예산", "departures": ("07:40",), "note": "월요일"},
 )
 MEAL_SOURCE_URL = "https://www.kongju.ac.kr/KNU/16863/subview.do"
 
@@ -129,6 +130,13 @@ def small_talk_response(message: str) -> str | None:
         if normalized == trigger or (
             len(normalized) <= len(trigger) + 4 and trigger in normalized
         ):
+            if isinstance(response, list):
+                options = [
+                    item.strip()
+                    for item in response
+                    if isinstance(item, str) and item.strip()
+                ]
+                return choice(options) if options else None
             return response
     return None
 
@@ -526,6 +534,18 @@ def shuttle_response(message: str) -> QueryResponse | None:
                     reference_date=str(current_year),
                 )
             ],
+            presentation={
+                "type": "shuttle",
+                "status": "최신 시간표 확인 필요",
+                "tone": "inactive",
+                "description": (
+                    "저장된 시간표의 운행기간이 지났습니다. "
+                    "공식 시간표에서 최신 정보를 확인해 주세요."
+                ),
+                "routes": [],
+                "notice": "운행기간과 노선은 학기마다 변경될 수 있습니다.",
+                "sourceUrl": SHUTTLE_SOURCE_URL,
+            },
             mode="structured",
         )
 
@@ -558,25 +578,27 @@ def shuttle_response(message: str) -> QueryResponse | None:
 
     if active_semester:
         semester, start, end = active_semester
+        status_label = "운행 중"
+        status_tone = "active"
         service_status = (
             f"현재 {semester} 무료버스 운행기간({start:%m.%d}~{end:%m.%d})입니다."
         )
+        period_label = f"{semester} · {start:%m.%d}~{end:%m.%d}"
     elif upcoming_semester:
         semester, start, end = upcoming_semester
+        status_label = "방학 · 운행 예정"
+        status_tone = "upcoming"
         service_status = (
             f"현재는 방학이라 정규 무료버스 운행기간이 아닙니다. "
             f"{semester}는 {start:%m.%d}~{end:%m.%d} 운행 예정입니다."
         )
+        period_label = f"{semester} · {start:%m.%d}~{end:%m.%d}"
     else:
+        status_label = "운행 종료"
+        status_tone = "inactive"
         service_status = "현재 학기 정규 무료버스 운행기간이 종료되었습니다."
+        period_label = "다음 학기 시간표를 확인해 주세요"
 
-    routes = shuttle_data.get("shuttle_schedules", [])
-    locations = set(tokenize(message))
-    matching = [
-        route
-        for route in routes
-        if any(location in route.get("route", "") for location in locations)
-    ]
     location_keywords = (
         "공주",
         "천안",
@@ -588,6 +610,42 @@ def shuttle_response(message: str) -> QueryResponse | None:
         "신창",
         "두정",
     )
+    routes = shuttle_data.get("shuttle_schedules", [])
+    locations = set(tokenize(message))
+    mentioned_locations = [
+        location
+        for _, location in sorted(
+            (
+                (message.find(location), location)
+                for location in location_keywords
+                if location in message
+            ),
+            key=lambda item: item[0],
+        )
+    ]
+    has_direction_intent = any(
+        marker in message for marker in ("에서", "부터", "가는", "행", "출발")
+    )
+    if len(mentioned_locations) >= 2 and has_direction_intent:
+        origin, destination = mentioned_locations[:2]
+
+        def follows_direction(route: dict[str, Any]) -> bool:
+            route_name = str(route.get("route", "")).replace("캠퍼스", "")
+            if "↔" in route_name:
+                endpoints = route_name.split("↔", 1)
+                return origin in endpoints[0] and destination in endpoints[1]
+            if "→" not in route_name:
+                return False
+            departure, arrival = route_name.split("→", 1)
+            return origin in departure and destination in arrival
+
+        matching = [route for route in routes if follows_direction(route)]
+    else:
+        matching = [
+            route
+            for route in routes
+            if any(location in route.get("route", "") for location in locations)
+        ]
     is_general_question = not any(
         keyword in message for keyword in location_keywords
     )
@@ -606,7 +664,14 @@ def shuttle_response(message: str) -> QueryResponse | None:
 
     if is_general_question:
         lines = [service_status, "", "주요 등교 노선과 출발 시간은 다음과 같습니다."]
-        lines.extend(f"- {route}: {times}" for route, times in SHUTTLE_ROUTE_SUMMARY)
+        lines.extend(
+            (
+                f"- {route['name']}: "
+                f"{'·'.join(route['departures'])} 출발"
+                + (f" ({route['note']})" if route.get("note") else "")
+            )
+            for route in SHUTTLE_ROUTE_SUMMARY
+        )
         lines.extend(
             [
                 "- 캠퍼스 순환: 공주↔천안, 공주↔예산, 예산↔신창역",
@@ -618,6 +683,33 @@ def shuttle_response(message: str) -> QueryResponse | None:
         return QueryResponse(
             response="\n".join(lines),
             sources=[source],
+            presentation={
+                "type": "shuttle",
+                "status": status_label,
+                "tone": status_tone,
+                "description": service_status,
+                "period": period_label,
+                "routes": [
+                    {
+                        "name": route["name"],
+                        "trips": [
+                            {
+                                "departure": departure,
+                                "note": route.get("note"),
+                            }
+                            for departure in route["departures"]
+                        ],
+                    }
+                    for route in SHUTTLE_ROUTE_SUMMARY
+                ],
+                "circulation": (
+                    "공주↔천안 · 공주↔예산 · 예산↔신창역"
+                ),
+                "notice": (
+                    "공휴일·주말·개교기념일에는 운행하지 않습니다."
+                ),
+                "sourceUrl": SHUTTLE_SOURCE_URL,
+            },
             mode="structured",
         )
 
@@ -630,10 +722,21 @@ def shuttle_response(message: str) -> QueryResponse | None:
                 f"[전체 공식 시간표]({SHUTTLE_SOURCE_URL})"
             ),
             sources=[source],
+            presentation={
+                "type": "shuttle",
+                "status": status_label,
+                "tone": status_tone,
+                "description": service_status,
+                "period": period_label,
+                "routes": [],
+                "notice": "해당 출발지의 등록된 노선을 찾지 못했습니다.",
+                "sourceUrl": SHUTTLE_SOURCE_URL,
+            },
             mode="fallback",
         )
 
     lines = [service_status]
+    route_presentations = []
     for route in selected:
         lines.append(f"\n[{route.get('route', '노선')}]")
         stops = [stop for stop in route.get("stops", []) if stop]
@@ -641,15 +744,45 @@ def shuttle_response(message: str) -> QueryResponse | None:
             lines.append(f"- 경유: {' → '.join(stops)}")
         for timetable in route.get("timetable", [])[:4]:
             departure = timetable.get("departure_time", "시간 미정")
-            arrival = timetable.get("arrival_time")
+            arrival = timetable.get("arrival_time") or (
+                timetable.get(stops[-1]) if stops else None
+            )
             lines.append(
                 f"- {departure} 출발"
                 + (f" · {arrival} 도착" if arrival else "")
             )
+        route_presentations.append(
+            {
+                "name": route.get("route", "노선"),
+                "stops": stops,
+                "trips": [
+                    {
+                        "departure": timetable.get(
+                            "departure_time",
+                            "시간 미정",
+                        ),
+                        "arrival": timetable.get("arrival_time")
+                        or (timetable.get(stops[-1]) if stops else None),
+                        "note": timetable.get("vehicle"),
+                    }
+                    for timetable in route.get("timetable", [])[:4]
+                ],
+            }
+        )
     lines.append(f"\n[정류장별 공식 시간표]({SHUTTLE_SOURCE_URL})")
     return QueryResponse(
         response="\n".join(lines),
         sources=[source],
+        presentation={
+            "type": "shuttle",
+            "status": status_label,
+            "tone": status_tone,
+            "description": service_status,
+            "period": period_label,
+            "routes": route_presentations,
+            "notice": "정류장별 도착 시각은 공식 시간표에서 확인해 주세요.",
+            "sourceUrl": SHUTTLE_SOURCE_URL,
+        },
         mode="structured",
     )
 

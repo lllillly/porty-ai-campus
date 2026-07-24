@@ -7,6 +7,7 @@ import QuickActions from "../components/QuickActions";
 import DietCard from "../components/DietCard";
 import DietSettingsModal from "../components/DietSettingsModal";
 import CalendarCard from "../components/CalendarCard";
+import ShuttleCard from "../components/ShuttleCard";
 import CampusMap from "../components/CampusMap";
 import CourseRegist from "../components/CourseRegist";
 import FAQPreview from "../components/FAQPreview";
@@ -188,9 +189,18 @@ const ChatPage = () => {
         history,
       });
 
+      const responseText =
+        response?.response || "응답을 가져올 수 없습니다.";
       appendChat({
         sender: "porty",
-        text: response?.response || "응답을 가져올 수 없습니다.",
+        text: responseText,
+        component:
+          response?.presentation?.type === "shuttle" ? (
+            <ShuttleCard
+              data={response.presentation}
+              onBackToMain={handleBackToMain}
+            />
+          ) : null,
       });
     } catch {
       appendChat({

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -27,6 +27,7 @@ class Source(BaseModel):
 class QueryResponse(BaseModel):
     response: str
     sources: list[Source] = Field(default_factory=list)
+    presentation: dict[str, Any] | None = None
     mode: Literal[
         "small-talk",
         "structured",

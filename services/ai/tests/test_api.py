@@ -28,6 +28,31 @@ def test_query_handles_small_talk():
     assert response.json()["mode"] == "small-talk"
 
 
+def test_identity_small_talk_can_use_multiple_natural_responses(monkeypatch):
+    selections = iter((0, 1))
+
+    def select_in_order(options):
+        return options[next(selections)]
+
+    monkeypatch.setattr(main, "choice", select_in_order)
+
+    with TestClient(app) as client:
+        first = client.post(
+            "/api/ai/query",
+            json={"messages": [{"role": "user", "content": "너는 누구야?"}]},
+        ).json()
+        second = client.post(
+            "/api/ai/query",
+            json={"messages": [{"role": "user", "content": "너는 누구야?"}]},
+        ).json()
+
+    assert first["mode"] == "small-talk"
+    assert second["mode"] == "small-talk"
+    assert first["response"] != second["response"]
+    assert "포티" in first["response"]
+    assert "포티" in second["response"]
+
+
 def test_query_returns_verified_campus_address():
     with TestClient(app) as client:
         response = client.post(
@@ -348,7 +373,34 @@ def test_current_shuttle_question_returns_period_routes_and_times():
     assert "2학기" in payload["response"]
     assert "유성 → 공주" in payload["response"]
     assert "07:50" in payload["response"]
+    assert payload["presentation"]["type"] == "shuttle"
+    assert payload["presentation"]["status"] == "방학 · 운행 예정"
+    assert len(payload["presentation"]["routes"]) == 6
+    assert payload["presentation"]["routes"][0]["trips"][0]["departure"] == "07:50"
     assert payload["sources"][0]["source_url"].endswith("/16872/subview.do")
+
+
+def test_directional_shuttle_question_returns_only_requested_direction():
+    with TestClient(app) as client:
+        response = client.post(
+            "/api/ai/query",
+            json={
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": "천안에서 공주 가는 셔틀 알려줘",
+                    }
+                ]
+            },
+        )
+
+    routes = response.json()["presentation"]["routes"]
+    assert [route["name"] for route in routes] == ["천안→공주"]
+    assert routes[0]["trips"][0] == {
+        "departure": "07:40",
+        "arrival": "08:40",
+        "note": None,
+    }
 
 
 def test_static_answer_starts_with_direct_fact_and_keeps_conditions():
