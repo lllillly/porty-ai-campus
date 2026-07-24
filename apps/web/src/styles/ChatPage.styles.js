@@ -74,19 +74,21 @@ export const BrandButton = styled.button`
 `;
 
 export const Logo = styled.img`
-  width: 38px;
-  height: 56px;
-  flex: 0 0 38px;
+  width: 46px;
+  height: 46px;
+  flex: 0 0 46px;
   padding: 0;
   border: 0;
-  border-radius: 0;
-  background: transparent;
-  object-fit: contain;
+  border-radius: 15px;
+  background: var(--porty-primary-soft);
+  object-fit: cover;
+  object-position: center top;
 
   @media (max-width: 768px) {
-    width: 34px;
-    height: 50px;
-    flex-basis: 34px;
+    width: 42px;
+    height: 42px;
+    flex-basis: 42px;
+    border-radius: 14px;
   }
 `;
 
@@ -394,20 +396,21 @@ export const MessageWrapper = styled.div`
 `;
 
 export const AvatarWrapper = styled.div`
-  width: 32px;
-  height: 48px;
-  flex: 0 0 32px;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
   padding: 0;
-  overflow: visible;
+  overflow: hidden;
   border: 0;
-  border-radius: 0;
-  background: transparent;
+  border-radius: 14px;
+  background: var(--porty-primary-soft);
 
   img {
     width: 100%;
     height: 100%;
     display: block;
-    object-fit: contain;
+    object-fit: cover;
+    object-position: center top;
   }
 `;
 
