@@ -3,21 +3,23 @@ import { Coffee, Loader, Search, Send, Settings } from "react-feather";
 import { sendChatMessage } from "../api/chatApi";
 
 import ChatBubble from "../components/ChatBubble";
-import QuickActions from "../components/QuickActions";
+import ChatMessage from "../components/ChatMessage";
 import DietCard from "../components/DietCard";
 import DietSettingsModal from "../components/DietSettingsModal";
 import CalendarCard from "../components/CalendarCard";
-import ShuttleCard from "../components/ShuttleCard";
-import StudentNewsCard from "../components/StudentNewsCard";
 import CampusMap from "../components/CampusMap";
 import CourseRegist from "../components/CourseRegist";
-import FAQPreview from "../components/FAQPreview";
-import WelcomeIntro from "../components/WelcomeIntro";
 
 import Toast from "../components/Toast";
 import SettingsModal from "../components/SettingsModal";
 import SplashScreen from "../components/SplashScreen";
 import { isAcademicCalendarQuery } from "../utils/queryIntents";
+import {
+  clearChatSession,
+  getInitialChats,
+  getOrCreateSessionId,
+  saveChats,
+} from "../utils/chatSession";
 
 import {
   ChatContainer,
@@ -39,43 +41,12 @@ import {
   SendButton,
 } from "../styles/ChatPage.styles";
 
-const generateSessionId = () => {
-  return crypto.randomUUID();
-};
-
-const getOrCreateSessionId = () => {
-  let sessionId = sessionStorage.getItem("chat_session_id");
-  if (!sessionId) {
-    sessionId = generateSessionId();
-    sessionStorage.setItem("chat_session_id", sessionId);
-  }
-  return sessionId;
-};
-
-const CHAT_MEMORY_KEY = "porty_session_chats_v3";
-const INITIAL_CHATS = [
-  {
-    sender: "porty",
-    showWelcome: true,
-  },
-];
-
-const getInitialChats = () => {
-  try {
-    const saved = JSON.parse(sessionStorage.getItem(CHAT_MEMORY_KEY));
-    return Array.isArray(saved) && saved.length > 0 ? saved : INITIAL_CHATS;
-  } catch {
-    return INITIAL_CHATS;
-  }
-};
-
 const ChatPage = () => {
   const [message, setMessage] = useState("");
-  const [sessionId, setSessionId] = useState("");
+  const [sessionId] = useState(getOrCreateSessionId);
   const [chats, setChats] = useState(getInitialChats);
 
   const [loading, setLoading] = useState(false);
-  const [showFAQ, setShowFAQ] = useState(false);
 
   const [dietSettings, setDietSettings] = useState(null);
   const [showDietModal, setShowDietModal] = useState(false);
@@ -91,32 +62,24 @@ const ChatPage = () => {
   const chatBodyRef = useRef(null);
   const lastChatRef = useRef(null);
   const chatsRef = useRef(chats);
+  const toastTimerRef = useRef(null);
 
   const showToast = (msg) => {
     setToastMessage(msg);
-    setTimeout(() => setToastMessage(""), 1800);
+    window.clearTimeout(toastTimerRef.current);
+    toastTimerRef.current = window.setTimeout(
+      () => setToastMessage(""),
+      1800,
+    );
   };
 
   useEffect(() => {
-    setSessionId(getOrCreateSessionId());
+    return () => window.clearTimeout(toastTimerRef.current);
   }, []);
 
   useEffect(() => {
     chatsRef.current = chats;
-    const serializableChats = chats
-      .filter((chat) => chat.text)
-      .slice(-24)
-      .map(({ sender, text, showQuickActions, showWelcome, presentation }) => ({
-        sender,
-        text,
-        showQuickActions: Boolean(showQuickActions),
-        showWelcome: Boolean(showWelcome),
-        presentation: presentation || null,
-      }));
-    sessionStorage.setItem(
-      CHAT_MEMORY_KEY,
-      JSON.stringify(serializableChats),
-    );
+    saveChats(chats);
   }, [chats]);
 
   useEffect(() => {
@@ -169,7 +132,6 @@ const ChatPage = () => {
 
     setMessage("");
     setLoading(true);
-    setShowFAQ(false);
 
     appendChat({ sender: "user", text });
 
@@ -255,8 +217,7 @@ const ChatPage = () => {
     });
 
   const resetConversation = () => {
-    sessionStorage.removeItem(CHAT_MEMORY_KEY);
-    sessionStorage.removeItem("chat_session_id");
+    clearChatSession();
     window.location.reload();
   };
 
@@ -314,65 +275,17 @@ const ChatPage = () => {
 
       {toastMessage && <Toast message={toastMessage} />}
 
-      {/* FAQPreview — 반드시 ChatBody 밖에 있어야 정상 표시됨! */}
-      {showFAQ && (
-        <FAQPreview
-          searchTerm={message}
-          onSelect={(q) => {
-            setShowFAQ(false);
-            sendMessage(q);
-          }}
-          onClose={() => setShowFAQ(false)}
-        />
-      )}
-
       <ChatBody ref={chatBodyRef} $isDark={isDarkMode}>
         {chats.map((c, idx) => (
           <div key={idx} ref={idx === chats.length - 1 ? lastChatRef : null}>
-            {c.showWelcome ? (
-              <WelcomeIntro
-                onActionClick={sendMessage}
-                onDietSetup={() => setShowDietModal(true)}
-                hasDietSettings={!!dietSettings}
-                isDark={isDarkMode}
-              />
-            ) : c.presentation?.type === "shuttle" ? (
-              <div style={{ display: "flex" }}>
-                <ShuttleCard
-                  data={c.presentation}
-                  onBackToMain={handleBackToMain}
-                />
-              </div>
-            ) : c.presentation?.type === "student-news" ? (
-              <div style={{ display: "flex" }}>
-                <StudentNewsCard
-                  data={c.presentation}
-                  onRead={(index) =>
-                    sendMessage(`${index + 1}번 학생소식 내용 보여줘`)
-                  }
-                  onBackToMain={handleBackToMain}
-                />
-              </div>
-            ) : c.component ? (
-              <div style={{ display: "flex" }}>{c.component}</div>
-            ) : (
-              <>
-                <ChatBubble
-                  message={c.text}
-                  isUser={c.sender === "user"}
-                  isDark={isDarkMode}
-                />
-
-                {c.showQuickActions && (
-                  <QuickActions
-                    onActionClick={sendMessage}
-                    onDietSetup={() => setShowDietModal(true)}
-                    hasDietSettings={!!dietSettings}
-                    isDark={isDarkMode}
-                  />
-                )}
-              </>
-            )}
+            <ChatMessage
+              chat={c}
+              isDark={isDarkMode}
+              hasDietSettings={Boolean(dietSettings)}
+              onActionClick={sendMessage}
+              onDietSetup={() => setShowDietModal(true)}
+              onBackToMain={handleBackToMain}
+            />
           </div>
         ))}
 
@@ -394,7 +307,6 @@ const ChatPage = () => {
             $isDark={isDarkMode}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            onFocus={() => setShowFAQ(true)}
             onKeyDown={(e) => e.key === "Enter" && sendMessage()}
             placeholder="궁금한 학교생활을 물어보세요"
           />
@@ -431,7 +343,6 @@ const ChatPage = () => {
           onClose={() => setShowDarkModal(false)}
         />
       )}
-
     </ChatContainer>
   );
 };

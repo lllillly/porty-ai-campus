@@ -72,7 +72,7 @@ export async function sendChatMessage({ sessionId, message, history = [] }) {
   });
 
   if (!request.ok) {
-    throw new Error(`AI server returned ${request.status}`);
+    throw new Error(`PORTY server returned ${request.status}`);
   }
 
   const payload = await request.json();
@@ -85,7 +85,6 @@ export async function sendChatMessage({ sessionId, message, history = [] }) {
       sources: payload.sources || [],
     });
   } catch (error) {
-    // 채팅 응답은 유지하고 저장 실패만 개발자 도구에 표시합니다.
     console.warn("Failed to persist chat exchange", error);
   }
 

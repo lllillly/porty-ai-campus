@@ -5,22 +5,20 @@ import { PageWrapper } from "./styles/CommonStyles";
 
 const HealthPage = lazy(() => import("./pages/HealthPage"));
 
-const App = () => {
-    return (
-        <PageWrapper>
-                <Routes>
-                    <Route path="/" element={<ChatPage />} />
-                    <Route
-                      path="/health"
-                      element={
-                        <Suspense fallback={null}>
-                          <HealthPage />
-                        </Suspense>
-                      }
-                    />
-                </Routes>
-        </PageWrapper>
-    );
-};
+const App = () => (
+  <PageWrapper>
+    <Routes>
+      <Route path="/" element={<ChatPage />} />
+      <Route
+        path="/health"
+        element={
+          <Suspense fallback={null}>
+            <HealthPage />
+          </Suspense>
+        }
+      />
+    </Routes>
+  </PageWrapper>
+);
 
 export default App;

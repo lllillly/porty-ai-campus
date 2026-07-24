@@ -499,15 +499,11 @@ export const InputWrapper = styled.div`
     ${({ $isDark }) => ($isDark ? "#3A443F" : "#D6E1DC")};
   border-radius: 16px;
   background: ${({ $isDark }) => ($isDark ? "#252E29" : "#F7FAF7")};
-  box-shadow: none;
-  transition:
-    border-color 160ms ease,
-    box-shadow 160ms ease;
+  transition: border-color 160ms ease;
 
   &:focus-within {
     border-color: var(--porty-primary);
     background: var(--porty-surface);
-    box-shadow: 0 0 0 4px rgba(120, 214, 173, 0.16);
   }
 `;
 
@@ -565,53 +561,6 @@ export const SendButton = styled.button`
       transform: rotate(360deg);
     }
   }
-`;
-
-export const FloatingArea = styled.div`
-  position: fixed;
-  right: 20px;
-  bottom: 92px;
-  z-index: 200;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 8px;
-`;
-
-export const FabButton = styled.button`
-  width: 50px;
-  height: 50px;
-  border: 0;
-  border-radius: 18px;
-  background: ${palette.green};
-  color: #10251a;
-  font-size: 22px;
-  box-shadow: 0 10px 24px rgba(8, 112, 67, 0.24);
-  cursor: pointer;
-`;
-
-export const OptionButtons = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  pointer-events: ${({ $open }) => ($open ? "auto" : "none")};
-`;
-
-export const OptionFab = styled.button`
-  width: 44px;
-  height: 44px;
-  display: grid;
-  place-items: center;
-  border: 1px solid
-    ${({ $isDark }) => ($isDark ? "#303934" : palette.border)};
-  border-radius: 15px;
-  background: ${({ $isDark }) => ($isDark ? "#1B211E" : "#FFFFFF")};
-  color: ${({ $isDark }) => ($isDark ? "#F5F7F6" : palette.text)};
-  box-shadow: 0 8px 24px rgba(28, 54, 42, 0.12);
-  cursor: pointer;
-  opacity: ${({ $open }) => ($open ? 1 : 0)};
-  transform: translateY(${({ $open }) => ($open ? "0" : "6px")});
-  transition: all 180ms ease;
 `;
 
 export const ToastContainer = styled.div`

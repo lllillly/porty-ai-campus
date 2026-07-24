@@ -1,2 +1,1 @@
-"""PORTY AI retrieval service."""
-
+"""PORTY campus information service."""

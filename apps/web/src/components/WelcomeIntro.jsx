@@ -23,9 +23,12 @@ const WelcomeIntro = ({
         </WelcomeCharacter>
 
         <div>
-          <WelcomeTitle>오늘 학교에서 뭐가 필요하세요?</WelcomeTitle>
+          <WelcomeTitle>
+            안녕하세요, 국립공주대학교 챗봇 포티입니다.
+          </WelcomeTitle>
           <WelcomeDescription>
-            시간표부터 오늘 메뉴까지, 필요한 내용을 바로 찾아보세요.
+            학사일정부터 식단과 순환버스까지, 학교생활에 필요한 정보를
+            찾아보세요.
           </WelcomeDescription>
         </div>
       </WelcomeCopy>

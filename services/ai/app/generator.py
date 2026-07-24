@@ -170,12 +170,8 @@ def extractive_answer(hit: SearchHit, question: str | None = None) -> str:
             if score > 0
         ]
 
-    # The fallback must still answer like an assistant, not like a search
-    # result. Lead with the most relevant factual sentence, then keep the
-    # remaining conditions and steps instead of dropping them.
-    # Curated documents are written answer-first. Keeping the first sentence as
-    # the lead prevents a highly repeated query word in a caveat from moving
-    # "확인해 주세요" above the actual answer.
+    # 정제 문서는 첫 문장에 결론을 둔다. 검색어 빈도가 높은 주의 문구가
+    # 실제 답변보다 앞서지 않도록 첫 문장을 유지한다.
     selected_indices = [0]
     for index in [0, *ranked_indices, *range(len(lines))]:
         if index not in selected_indices:

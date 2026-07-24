@@ -8,7 +8,7 @@ describe("sendChatMessage", () => {
     vi.unstubAllGlobals();
   });
 
-  it("returns the AI response in demo mode", async () => {
+  it("returns the server response", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue({
@@ -30,7 +30,7 @@ describe("sendChatMessage", () => {
     expect(result.response).toContain("천안캠퍼스");
   });
 
-  it("throws when the AI server returns an error", async () => {
+  it("throws when the server returns an error", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue({
